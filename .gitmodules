@@ -1,0 +1,3 @@
+[submodule "ai-workflow-capstone"]
+	path = ai-workflow-capstone
+	url = https://github.com/aavail/ai-workflow-capstone

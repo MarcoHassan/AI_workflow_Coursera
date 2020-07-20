@@ -1,0 +1,26 @@
+* Goal of the project 
+
+Recently at AAVAIL there has been discussion among management about
+different approaches to revenue generation. 
+
+AAVAIL launched using a tiered, subscription-based service which
+showed promise, but conversations with users, especially those outside
+of US markets, prompted an experiment using an à la carte
+approach. 
+
+This experiment was carried out mostly outside of the US and there are
+now a couple of years of data with a few thousand active users. 
+
+The data are transaction-level purchases across 38 different countries
+and are invoiced in batches. 
+
+Management has nearly decided to make the switch to the new model, but
+they find it *difficult to predict monthly revenue*. 
+
+They have asked you to create a service that, at any point in time,
+*will predict the revenue for the following month*. They have also
+asked that the service be given the ability to project revenue for a
+specific country. 
+
+To keep the development time reasonable you have been advised to limit
+your model to the *ten countries with the most revenue*.
