@@ -32,6 +32,8 @@ class ApiTest(unittest.TestCase):
     test the essential functionality
     """
 
+    # unittest.skipUnless(condition, reason) skip unless the condition
+    # is true. the reason is returned when running the test.
     @unittest.skipUnless(server_available,"local server is not running")
     def test_01_train(self):
         """

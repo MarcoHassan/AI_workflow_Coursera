@@ -3,6 +3,12 @@
 model tests
 """
 
+import sys
+
+paths = ['/Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/workflow-template/case-study-soln/']
+paths.extend(sys.path)
+sys.path = paths
+
 import os
 import csv
 import unittest
