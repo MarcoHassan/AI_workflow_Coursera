@@ -1,0 +1,255 @@
+* EDA - Exploratory Data Analysis
+:properties:
+:header-args:ein-python: :session http://127.0.0.1:8888/EDA.ipynb
+:end: 
+
+Apparently this is the wrong DataSet to work with. You have to work
+with the =.json= data provided in the =cs-train= folder in the
+=ai-workflow-capstone=.
+
+** Libraries
+
+ #+NAME: D4B4008C-794B-4E0A-9F86-2D3378035D3C
+#+begin_src ein-python :results output
+## Standard ML tools.
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import os
+ #+end_src
+
+ #+RESULTS: D4B4008C-794B-4E0A-9F86-2D3378035D3C
+
+** Display Options
+
+#+NAME: 0438BC5E-80DD-4BD1-A107-1AF4F21277B8
+#+begin_src ein-python :results output
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+np.set_printoptions(threshold=np.inf)
+#+end_src
+
+#+RESULTS: 0438BC5E-80DD-4BD1-A107-1AF4F21277B8
+
+** Global Paramters
+
+ #+NAME: CFF5932E-86F6-4C31-9932-BEB2F70EDBA5
+ #+begin_src ein-python :results output
+WRKDIR = "~/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/"
+ #+end_src
+
+ #+RESULTS: CFF5932E-86F6-4C31-9932-BEB2F70EDBA5
+
+** Import Dataset
+
+ #+NAME: 391B7E5A-8681-4DFB-97CA-9AF74DE97E9A
+ #+begin_src ein-python :results output
+df = pd.read_excel(os.path.join(WRKDIR, "capstone_dataset.xlsx"))
+ #+end_src
+
+ #+RESULTS: 391B7E5A-8681-4DFB-97CA-9AF74DE97E9A
+
+** Explore basic properties of data
+
+
+#+NAME: 434A0249-32AE-4E72-95A3-4EC707A67D46
+#+begin_src ein-python :results output
+print ("Data Types\n{}\n".format ("="* 35))
+print (df.dtypes) 
+
+
+print ("\nNull Values\n{}\n".format ("="* 35))
+print (df.isnull().sum(axis = 0))
+
+#+end_src
+
+#+RESULTS: 434A0249-32AE-4E72-95A3-4EC707A67D46
+#+begin_example
+Data Types
+===================================
+
+InvoiceNo              object
+StockCode              object
+Description            object
+Quantity                int64
+InvoiceDate    datetime64[ns]
+UnitPrice             float64
+CustomerID            float64
+Country                object
+dtype: object
+
+Null Values
+===================================
+
+InvoiceNo           0
+StockCode           0
+Description      1454
+Quantity            0
+InvoiceDate         0
+UnitPrice           0
+CustomerID     135080
+Country             0
+dtype: int64
+#+end_example
+
+
+#+NAME: DA7450A0-1E98-4C70-9BD9-AC9A66C45C4C
+#+begin_src ein-python :results output
+df.head (5)
+#+end_src
+
+#+RESULTS: DA7450A0-1E98-4C70-9BD9-AC9A66C45C4C
+:   InvoiceNo StockCode                          Description  Quantity         InvoiceDate  UnitPrice  CustomerID         Country
+: 0    536365    85123A   WHITE HANGING HEART T-LIGHT HOLDER         6 2010-12-01 08:26:00       2.55     17850.0  United Kingdom
+: 1    536365     71053                  WHITE METAL LANTERN         6 2010-12-01 08:26:00       3.39     17850.0  United Kingdom
+: 2    536365    84406B       CREAM CUPID HEARTS COAT HANGER         8 2010-12-01 08:26:00       2.75     17850.0  United Kingdom
+: 3    536365    84029G  KNITTED UNION FLAG HOT WATER BOTTLE         6 2010-12-01 08:26:00       3.39     17850.0  United Kingdom
+: 4    536365    84029E       RED WOOLLY HOTTIE WHITE HEART.         6 2010-12-01 08:26:00       3.39     17850.0  United Kingdom
+
+*** Identify the correct type for the variables 
+
+ It looks like =InvoiceNo= and =StockCode= are categories. As well as
+ description.
+
+ #+NAME: 16469B38-5F32-4F0D-927E-CB709C1B27C7
+ #+begin_src ein-python :results output
+## get categorical variables
+num_variables = list (df.describe ().columns) 
+
+cat_variables = [x for x in df.columns if x not in num_variables]
+
+print("Numerical Variables\n{}\n{}\n\nCategorical Variables\n{}\n{}" \
+      .format("="*35, num_variables, "="*35, cat_variables))
+ #+end_src
+
+ #+RESULTS: 16469B38-5F32-4F0D-927E-CB709C1B27C7
+ : Numerical Variables
+ : ===================================
+ : ['Quantity', 'UnitPrice', 'CustomerID']
+ : 
+ : Categorical Variables
+ : ===================================
+ : ['InvoiceNo', 'StockCode', 'Description', 'InvoiceDate', 'Country']
+
+ #+NAME: 3CE4DBD4-1954-471B-92E0-FEABF820B531
+ #+begin_src ein-python :results output
+for i in cat_variables: 
+    print ("Number Different {}: {}\n".format (i, len (df[i].unique())))
+ #+end_src
+
+ #+RESULTS: 3CE4DBD4-1954-471B-92E0-FEABF820B531
+ #+begin_example
+ Number Different InvoiceNo: 25900
+
+ Number Different StockCode: 4070
+
+ Number Different Description: 4224
+
+ Number Different InvoiceDate: 23260
+
+ Number Different Country: 38
+
+ #+end_example
+
+ Check for =CustomerID= almost surely it is a categorical variable and
+ it does little sense to treat is as a numerical variable
+
+ #+NAME: 2EDD10B0-C917-4115-BB9F-AE8592F1ACFD
+ #+BEGIN_SRC ein-python  :results output
+for i in num_variables:
+    print ("Number Different {}: {}\n".format (i, len(df[i].unique())))
+ #+END_SRC
+
+ #+RESULTS: 2EDD10B0-C917-4115-BB9F-AE8592F1ACFD
+ : Number Different Quantity: 722
+ : 
+ : Number Different UnitPrice: 1630
+ : 
+ : Number Different CustomerID: 4373
+ : 
+
+ So you can treat them all as categorical variables
+
+*** Replace the NaN values by a new category class
+
+#+NAME: 13936B8C-C8E6-4296-96C2-04E5C025D5B7
+#+begin_src ein-python :results output
+df.loc[df.Description[df.Description.isnull()].index, "Description"] = 'no_description'
+
+df.loc[df.Description[df.Description.isnull()].index, "CustomerID"] = 'no_id'
+#+end_src
+
+#+RESULTS: 13936B8C-C8E6-4296-96C2-04E5C025D5B7
+
+#+NAME: 5D27031E-1873-4D35-A3CA-8B39F5204FB7
+#+begin_src ein-python :results output
+df.loc[df.CustomerID[df.CustomerID.isnull()].index, "CustomerID"] = 'no_id'
+#+end_src
+
+#+RESULTS: 5D27031E-1873-4D35-A3CA-8B39F5204FB7
+
+#+NAME: 438209D4-200D-4D59-B577-1631FD447543
+#+begin_src ein-python :results output
+print ("\nNull Values after Treatment\n{}\n".format ("="* 35))
+print (df.isnull().sum(axis = 0))
+#+end_src
+
+#+RESULTS: 438209D4-200D-4D59-B577-1631FD447543
+#+begin_example
+
+Null Values after Treatment
+===================================
+
+InvoiceNo      0
+StockCode      0
+Description    0
+Quantity       0
+InvoiceDate    0
+UnitPrice      0
+CustomerID     0
+Country        0
+dtype: int64
+#+end_example
+
+*** Cast all of the variables into categorical variables 
+
+#+NAME: EE2482F0-6D10-49B4-931C-68BA3F3D6E58
+#+begin_src ein-python :results output
+df = df[list(df.columns)].astype('category')
+
+df.dtypes
+#+end_src
+
+#+RESULTS: EE2482F0-6D10-49B4-931C-68BA3F3D6E58
+: InvoiceNo      category
+: StockCode      category
+: Description    category
+: Quantity       category
+: InvoiceDate    category
+: UnitPrice      category
+: CustomerID     category
+: Country        category
+: dtype: object
+
+#+NAME: 26003B30-B14B-4670-9589-E4274AF36248
+#+BEGIN_SRC ein-python  :results output
+df.head(5)
+#+END_SRC
+
+#+RESULTS: 26003B30-B14B-4670-9589-E4274AF36248
+:   InvoiceNo StockCode                          Description Quantity         InvoiceDate UnitPrice CustomerID         Country
+: 0    536365    85123A   WHITE HANGING HEART T-LIGHT HOLDER        6 2010-12-01 08:26:00      2.55      17850  United Kingdom
+: 1    536365     71053                  WHITE METAL LANTERN        6 2010-12-01 08:26:00      3.39      17850  United Kingdom
+: 2    536365    84406B       CREAM CUPID HEARTS COAT HANGER        8 2010-12-01 08:26:00      2.75      17850  United Kingdom
+: 3    536365    84029G  KNITTED UNION FLAG HOT WATER BOTTLE        6 2010-12-01 08:26:00      3.39      17850  United Kingdom
+: 4    536365    84029E       RED WOOLLY HOTTIE WHITE HEART.        6 2010-12-01 08:26:00      3.39      17850  United Kingdom
+
+
+
+
+

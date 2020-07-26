@@ -1,0 +1,1636 @@
+* EDA - Correct Data
+:properties:
+:header-args:ein-python: :session http://127.0.0.1:8888/EDA.ipynb
+:end: 
+
+
+** Global Paramters
+
+ #+NAME: CFF5932E-86F6-4C31-9932-BEB2F70EDBA5
+ #+begin_src ein-python :results output
+WRKDIR = "/Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/"
+DATADIR = WRKDIR + "ai-workflow-capstone/cs-train/"
+ #+end_src
+
+
+** Libraries
+
+Multiple important packages
+
+#+NAME: 0D5B735B-F781-4732-809C-983E1992B501
+#+begin_src ein-python :results output
+#!START_LIB
+## To deal with files and OS
+import os
+import sys
+import shutil
+
+## Regular Expression
+import re
+
+## To dump the esimated model
+import pickle
+
+## To automatically set a default data type to an unspecified key in a
+## dict.
+from collections import defaultdict
+
+## For date manipulation
+import time
+from datetime import datetime
+
+## Standard data manipulation libraries
+import numpy as np
+import pandas as pd
+
+## For sql in Pandas
+from pandasql import sqldf
+nba = lambda q: sqldf(q, globals())
+
+## For plotting
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from pandas.plotting import register_matplotlib_converters
+import seaborn as sns
+
+register_matplotlib_converters()
+
+## for statistics evaluation; mathematical python package.
+from scipy import stats
+import math
+#!END_LIB
+#+end_src
+
+
+** Import functions
+
+Import the python package with your user-defined functions.
+
+#+NAME: 86334714-1029-4884-8D04-74AE85380BB5
+#+begin_src ein-python :results output
+import functions
+#+end_src
+
+
+** Display Options
+
+#+NAME: 0438BC5E-80DD-4BD1-A107-1AF4F21277B8
+#+begin_src ein-python :results output
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+np.set_printoptions(threshold=np.inf)
+#+end_src
+
+
+** ETL - Extract, Transform and Load
+
+#+NAME: F6FF40D4-81CF-4C08-BDA9-30D37927D5CA
+#+BEGIN_SRC ein-python  :results output
+df = functions.fetch_data (DATADIR)
+#+END_SRC
+
+
+** EDA 
+
+*** Check for missing entries
+
+ #+NAME: 50B66596-AACB-4CC9-9D9D-13DC221A3AAE
+ #+begin_src ein-python :results output
+print ("Data Types\n{}\n".format ("="* 35))
+print (df.dtypes) 
+
+print ("\nNull Values\n{}\n".format ("="* 35))
+print (df.isnull().sum(axis = 0))
+ #+end_src
+
+#+NAME: 6830D2FD-47F3-4FAE-BF51-060BC5F6200E
+#+begin_src ein-python :results output
+df.head (5)
+#+end_src
+
+*** Split Categorical And Numeric Variables
+
+#+NAME: 2F3340EE-0B78-4A8A-9F24-42EF7477215E
+#+begin_src ein-python :results output
+## get categorical variables
+num_variables = list (df.describe ().columns) 
+
+cat_variables = [x for x in df.columns if x not in num_variables]
+
+print("Numerical Variables\n{}\n{}\n\nCategorical Variables\n{}\n{}" \
+      .format("="*35, num_variables, "="*35, cat_variables))
+#+end_src
+
+
+Print Number of categories
+
+#+NAME: 87137DFB-BC0F-497B-B8FB-53ABDB765BAF
+#+begin_src ein-python :results output
+for i in cat_variables: 
+    print ("Number Different {}: {}\n".format (i, len (df[i].unique())))
+
+print (f"Total Dataset size: {len (df)}") 
+#+end_src
+
+You can notice above that some of the variables are wrongly
+classified. Day, month, year should be treated as categories. On top
+of it also customer_id should clearly be treated as a category.
+
+*** Replace the missing customer_id
+
+
+#+NAME: 35BCA4A4-FA09-49A8-B975-52989A1DE152
+#+BEGIN_SRC ein-python  :results output
+df.columns
+#+END_SRC
+
+#+NAME: 1C0AFFC8-4090-4E46-B5A0-65ED33A714D1
+#+begin_src ein-python :results output
+df.customer_id[df.customer_id.isnull()].head (5)
+#+end_src
+
+#+NAME: 7E3FCBC7-0DCA-45EB-92E2-EDAD33F1AFB9
+#+begin_src ein-python :results output
+df.loc[df.customer_id[df.customer_id.isnull()].index, "customer_id"] = 'noID'
+#+end_src
+
+#+NAME: 7FD36E6A-8629-4716-917D-4636BFEB6491
+#+begin_src ein-python :results output
+df.isnull ().sum (axis = 0)
+#+end_src
+
+*** 10 Countries with higher sales
+
+ #+NAME: 57015F06-859F-466A-8DE6-EA0D92FB8A7D
+ #+begin_src ein-python :results output
+q = \
+"""
+SELECT country, sum(price) as tot_revenue
+FROM df 
+GROUP BY country
+ORDER BY tot_revenue DESC
+"""
+ #+end_src
+   
+#+NAME: B98227B2-FBE2-4B07-87E2-BE9093270D83
+#+BEGIN_SRC ein-python  :results output
+df.columns
+#+END_SRC
+
+ #+NAME: E14A7CBB-FE59-4A7B-BF7E-98A0F3DE5F20
+ #+begin_src ein-python :results output
+a = nba (q)
+ #+end_src
+
+ Store the countries with the highest revenue
+
+ #+NAME: 0E1E9464-E10F-435D-9C0A-2EFADFF53E14
+ #+begin_src ein-python :results output
+max_countries = np.array(a.country.head(10))
+ #+end_src
+
+*** Restrict the dataset to the relevant 10 countries for the next visualization exercise
+
+#+NAME: 0CC003D9-4A74-4540-9C43-68A6862B36B1
+#+begin_src ein-python :results output
+print (f"Share of captured data: {df.country.map (lambda x: x in max_countries).sum (axis = 0)/len (df)}")
+
+df_max_country = df[df.country.map (lambda x: x in max_countries)]
+#+end_src
+
+*** Convert all the necessary variables to categorical variables
+
+#+NAME: 7CAAF612-2735-4922-83F9-79B826FA92F2
+#+begin_src ein-python :results output
+to_convert = [x for x in num_variables if x not in ['price', 'times_viewed', 'month']]
+
+df_max_country[to_convert] = df_max_country[to_convert].astype ('category')
+df_max_country[cat_variables] = df_max_country[cat_variables].astype ('category')
+
+cat_dtype = pd.api.types.CategoricalDtype(
+   categories=[x for x in range(1,13)], ordered=True)
+
+df_max_country["month"] = df_max_country.month.astype ('int').astype(cat_dtype)
+#+end_src
+ 
+#+NAME: 29BDCABA-7F49-41E7-AB6E-BB2563C76969
+#+begin_src ein-python :results output
+df_max_country.dtypes
+#+end_src
+
+*** Visualization
+
+#+NAME: 6576AC4E-2CF2-43B0-9DE4-2ADD25829499
+#+begin_src ein-python :results output
+q = \
+"""
+SELECT country, year, month, SUM(price) as revenue
+FROM df_max_country
+GROUP BY country, year, month
+"""
+#+end_src
+
+#+NAME: 2FBDE7BE-2D80-4BB9-8ECB-051B0B5B4400
+#+begin_src ein-python :results output
+df_rev_year = nba (q)
+#+end_src
+
+#+NAME: 505CE1C9-6AA6-423B-866F-5CD08D1A5E08
+#+begin_src ein-python 
+k1 = sns.violinplot(data = df_rev_year, x = 'year', y = 'revenue') 
+#+end_src
+
+
+Notice that above the width represents the amount of observations as
+interaction of months and country that fall in the specific bin.
+
+From the above you can see that the distribution of the revenues is
+highly skewed.
+
+#+NAME: 746E160E-A785-4966-AD43-B63E155790CC
+#+begin_src ein-python :results output
+k1 = sns.violinplot(data = df_rev_year, x = 'year', y = 'revenue', hue = "month") 
+#+end_src
+
+Notice moreover that you do not have entries for each month in every
+year
+
+
+** Convert to Times Series the Series for the Top 10 countries
+
+#+NAME: DEC93A22-FBE9-44F3-B271-E257148A2B3D
+#+begin_src ein-python :results output
+df_aggregate = functions.convert_df_to_ts (df, max_countries)
+#+end_src
+
+*** Visualize the aggregated data
+
+ #+NAME: AA9EFEBA-58EA-4A0E-83DE-CF47F6458F8C
+ #+begin_src ein-python :results output
+print (df_aggregate.dtypes) 
+print ()
+print (df_aggregate.head (5))
+ #+end_src
+
+Check the distribution and relation among the variables
+
+#+NAME: B764FCA0-CF28-4F48-84C5-D9EF99B2E259
+#+begin_src ein-python :results output
+sns.set(style="ticks", color_codes=True)
+
+## make a pair plot
+g = sns.PairGrid(df_aggregate[['purchases', 'unique_invoices',
+                               'total_views',
+                               'unique_streams', 'country']],
+                 hue = 'country')
+g = g.map_upper(sns.scatterplot, alpha = 0.3)
+g = g.map_lower(sns.kdeplot)
+g = g.map_diag(plt.hist, lw=2, alpha = 0.2).add_legend()
+#+end_src
+n[[file:ein-images/ob-ein-7acdeade1676a91a92d672aa07232032.png]]
+
+Notice that the sample is highly dominated by the United Kingdom. In
+fact we can see that this makes up a consistent share of the total
+revenues
+
+#+NAME: D2F680C6-441C-49F5-AB32-42B5F370C759
+#+begin_src ein-python :results output
+a = df_aggregate["country"] == "United Kingdom"
+
+df_aggregate[~a][["revenue"]].sum()/df_aggregate[["revenue"]].sum() * 100 
+#+end_src
+
+#+NAME: 0256D68B-F130-4687-9495-9B8723DB0428
+#+begin_src ein-python :results output
+df_aggregate[["revenue", "country"]].groupby ("country").count ()
+#+end_src
+
+*** Look at the correlation structure
+
+#+NAME: DC2CDFE4-C637-4DBC-AE34-9627B74734ED
+#+begin_src ein-python :results output
+corr = df_aggregate.corr()
+
+# Generate a mask for the upper triangle
+mask = np.triu(np.ones_like(corr, dtype=np.bool))
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(11, 9))
+# Generate a custom diverging colormap
+cmap = sns.diverging_palette(220, 10, as_cmap=True)
+# Draw the heatmap with the mask and correct aspect ratio
+sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+	    square=True, linewidths=.5, cbar_kws={"shrink": .5})
+#+end_src
+[[file:ein-images/ob-ein-388e0643eb2e641234f4b02c32f268a6.png]]
+
+
+As you could expect all of the variables correlates with one another.
+
+*** Hypothesis 
+
+    - No sensible difference among the countries in the average year.
+
+    - No statistical significant trend in the series.
+
+
+Notice that the revenues looks as being log-normal distributed
+
+#+NAME: 92AB40A5-0931-4084-AC9A-E6E3621DE3A5
+#+begin_src ein-python :results output
+tot_countries = len (df_aggregate.country.astype('category').cat.categories)
+#+end_src
+
+
+#+NAME: ACA2AB65-285F-4486-BD8E-4AC270039B69
+#+begin_src ein-python :results output
+## specify your R par(mfrow=c(x,y))
+f, axes = plt.subplots(figsize = (12, 6))
+
+idx = 1
+
+for country in max_countries:
+    plt.subplot (2, tot_countries/2, idx)
+    k1 = sns.distplot(df_aggregate[df_aggregate.country == country][["revenue"]], 
+                      kde = False ,fit = stats.lognorm)
+    k1.title.set_text(country)
+    idx += 1
+
+plt.show ()
+#+end_src
+
+[[file:ein-images/ob-ein-a219c53734d648b70a33b9b20ae607cf.png]]
+
+
+Test the hypothesis that the revenues are log-normal for each country.
+
+#+NAME: B491C417-C187-4A16-A76D-0C8CCB36C036
+#+begin_src ein-python :results output
+for country in max_countries:
+    a = np.array(df_aggregate[df_aggregate.country == country][["revenue"]])
+
+    a[a == 0]  = 10^-10
+
+    log_values = np.log(a)
+
+    print("For country {} the p-value for a log-normal distribution is: {} \n".format(country, stats.jarque_bera(a)[1]))
+#+end_src
+
+So the hypothesis is rejected with quite strong confidence. 
+
+*** Needed Data
+
+    Ideal dataset:
+
+    - continum of data. not disconnected as in the provided dataset
+      where just for 1 single year we have observations in each of the
+      months. It becomes diffcult to extract seasonality from it. 
+
+#+NAME: 456B8EE2-2BE9-47CF-B1CB-08F3D8443D47
+#+begin_src ein-python :results output
+for test_country in max_countries:
+
+    print("{}\n{}".format(test_country, "="*35))
+    
+    for country in max_countries:
+        a = np.array(df_aggregate[df_aggregate.country == test_country][["revenue"]])
+
+        b = np.array(df_aggregate[df_aggregate.country == country][["revenue"]])
+
+        tStat, pValue = stats.ttest_ind(a, b, equal_var = False) #run independent sample T-Test
+
+        print("P-value of equal revenues for {}: {}".format(country, pValue))
+
+    print() 
+#+end_src
+
+    - more granular level. for instance the type of sold items.
+
+    - more contextual data such as country economic indicators,
+      demographics etc. Like this you might be able to analyze
+      non-intuitive correlation structure.
+
+
+** Feature Engineering and Model Estimation
+
+#+NAME: 6E39B5DA-FD3D-4E4D-A84D-1673670DB386
+#+begin_src ein-python :results output
+# features_mat = functions.engineer_features_by_country(df_aggregate,
+#                                                       training = 0,
+#                                                       countries = max_countries)
+
+# If using this function you would then have to run the analysis by
+# country. Keep it simple here. It's a demo for workflow and not focus
+# on best modeling.
+
+features_mat = functions.engineer_features(df_aggregate,
+                                           training = 0)
+#+end_src
+
+#+RESULTS: 6E39B5DA-FD3D-4E4D-A84D-1673670DB386
+
+Given the above it is now possible to estimate the revenues in the
+next month. Either for the different countries separately merging then
+in a final step the results or directly at the aggregated level.
+
+#+NAME: 7E090F65-4579-4565-98E0-A0A9642E6774
+#+begin_src ein-python :results output
+features_mat[0].dtypes
+#+end_src
+
+#+RESULTS: 7E090F65-4579-4565-98E0-A0A9642E6774
+: previous_7         float64
+: previous_14        float64
+: previous_28        float64
+: previous_70        float64
+: previous_year      float64
+: recent_invoices    float64
+: recent_views       float64
+: dtype: object
+
+Notice that recent invoices and recent views were computed based on
+the average value of the =unique_views= and =total_views= for the
+period.
+
+Try some basic training technique
+
+#+NAME: 73BB109D-3F71-48B1-909F-C25ADB416A1B
+#+begin_src ein-python :results output
+#!START_LIB
+from sklearn.utils import shuffle
+from sklearn.model_selection import train_test_split, GridSearchCV
+
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.impute import SimpleImputer
+
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+
+# Regression Models
+from sklearn.svm import SVR
+from sklearn.tree import DecisionTreeRegressor
+
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+#!END_LIB
+#+end_src
+
+
+For the exercise we first forget about the structural dependency in
+the data. I just map a set of features to the output via standard
+regression techniques.  
+
+#+NAME: 61D9705F-3EFC-4A53-AA2C-06B41686239B
+#+begin_src ein-python :results output
+## If using functions.engineer_features_by_country ()
+# X_train, X_test, y_train, y_test = train_test_split(features_mat[[x for x in features_mat.columns if x != 'y_revenue']], 
+#                                                     np.array(features_mat[['y_revenue']]),
+#                                                     test_size = 0.3,
+#                                                     shuffle = False,
+# 						    random_state = 1)
+
+X_train, X_test, y_train, y_test = train_test_split(features_mat[0], 
+                                                    features_mat[1],
+                                                    test_size = 0.3,
+                                                    shuffle = False,
+						    random_state = 1)
+#+end_src
+
+#+RESULTS: 61D9705F-3EFC-4A53-AA2C-06B41686239B
+
+Notice the importance of *not shuffling here*. This due to the times
+series structure.
+
+#+NAME: 0037EF68-223D-4A5C-9DBC-EE93049E556A
+#+begin_src ein-python :results output
+print (y_test[:10])
+
+# print (features_mat[['y_revenue']][int (len (features_mat)*0.7) :int(len (features_mat)*0.7) + 10])
+
+print (features_mat[1][int (len (features_mat[1])*0.7) :int(len (features_mat[1])*0.7) + 10])
+#+end_src
+
+#+RESULTS: 0037EF68-223D-4A5C-9DBC-EE93049E556A
+: [184410.25 188673.1  184697.43 185624.39 181006.64 182722.73 182722.73
+:  186264.56 192054.46 170509.28]
+: [184410.25 188673.1  184697.43 185624.39 181006.64 182722.73 182722.73
+:  186264.56 192054.46 170509.28]
+
+*** Regression Exercise - Not Considering Temporal Structure in the Data 
+
+**** Create a simple baseline estimator. 
+
+  Compute a baseline estimator to check if the modeling made sense.
+
+  #+NAME: 1F2983EC-B46F-4A65-9760-6962B9D8308B
+  #+begin_src ein-python :results output
+print("Baseline - Simple Mean \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
+      format("=" * 35, 
+             mean_squared_error(y_test, np.repeat(np.mean(y_train), y_test.size)), 
+             mean_absolute_error(y_test, np.repeat(np.mean(y_train), y_test.size))
+             )
+      )
+  #+end_src
+
+  #+RESULTS: 1F2983EC-B46F-4A65-9760-6962B9D8308B
+  : Baseline - Simple Mean 
+  : ===================================
+  : 
+  :  Mean Squared Error: 8310335694.523872 
+  :  Mean Absolute Error : 62620.103359555316
+
+  So just a marginal improvement over a very rough baseline
+
+**** More Complex Models
+
+  #+NAME: 45E1D510-734E-4903-B0A5-413C15080F45
+  #+begin_src ein-python :results output
+## preprocessing pipeline
+cat_features = [x for x in X_train.columns if x not in X_train.describe().columns]
+num_features = list(X_train.describe().columns)
+  #+end_src
+
+  #+RESULTS: 45E1D510-734E-4903-B0A5-413C15080F45
+
+  #+NAME: 9AD78777-0C13-4170-B30F-B25E60197E80
+  #+begin_src ein-python :results output
+numeric_transformer = Pipeline(steps=[
+   ('imputer', SimpleImputer(strategy='mean')),
+   ('scaler', StandardScaler())])
+
+categorical_transformer = Pipeline(steps=[
+   ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+   ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+preprocessor = ColumnTransformer(
+   transformers=[
+       ('num', numeric_transformer, num_features),
+       ('cat', categorical_transformer, cat_features)])
+  #+end_src
+
+  #+RESULTS: 9AD78777-0C13-4170-B30F-B25E60197E80
+
+**** Support Vector Regression
+
+  Estimation Pipeline
+
+  #+NAME: 17194981-3BF6-40A4-8B1E-9BFE5E6B0DA9
+  #+begin_src ein-python :results output
+param_grid_svm = {
+      'svr__C': [0.01,0.1,0.5,1.0,1.5,5.0,10.0],
+}
+
+pipe_svr = Pipeline(steps = 
+                    [
+                        ('pre', preprocessor),
+                        ('svr', SVR(kernel = 'rbf'))
+                    ])
+
+grid = GridSearchCV(pipe_svr,
+		    param_grid=param_grid_svm,
+		    cv=5)
+
+grid.fit(X_train, y_train)
+
+y_pred = grid.predict(X_test)
+
+best_params = grid.best_params_
+  #+end_src
+
+  #+RESULTS: 17194981-3BF6-40A4-8B1E-9BFE5E6B0DA9
+  #+begin_example
+
+ NameErrorTraceback (most recent call last)
+ <ipython-input-164-ca5ca507b34c> in <module>
+       6                     [
+       7                         ('pre', preprocessor),
+ ----> 8                         ('dtree', Decisiontreeregressor(kernel = 'rbf'))
+       9                     ])
+      10 
+
+ NameError: name 'Decisiontreeregressor' is not defined
+  #+end_example
+
+  Check at the summary statistics
+
+  #+NAME: 50C3A21E-78C8-4118-84B8-E14EFBC8B001
+  #+begin_src ein-python :results output
+print("SVR \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
+      format("=" * 35, 
+             mean_squared_error(y_test, y_pred), 
+             mean_absolute_error(y_test, y_pred)
+             )
+      )
+  #+end_src
+
+  #+RESULTS: 50C3A21E-78C8-4118-84B8-E14EFBC8B001
+  : SVR 
+  : ===================================
+  : 
+  :  Mean Squared Error: 8775565821.677137 
+  :  Mean Absolute Error : 58317.993981713655
+
+  : Baseline - Simple Mean 
+  : ===================================
+  : 
+  :  Mean Squared Error: 798737443.6172509 
+  :  Mean Absolute Error : 28195.73404389957
+
+ Not working at all. Even worsening the performance. 
+
+**** Random Forest
+
+  #+NAME: 96444CFC-F47E-4F80-8C46-9B03CBC25A33
+  #+begin_src ein-python :results output
+param_grid_tree = {
+      'dtree__max_depth': [4,5,6,7,8,9,10,12,14,15],
+}
+
+pipe_dtree = Pipeline(steps = 
+                    [
+                        ('pre', preprocessor),
+                        ('dtree', DecisionTreeRegressor())
+                    ])
+
+grid = GridSearchCV(pipe_dtree,
+		    param_grid=param_grid_tree,
+		    cv=5)
+
+grid.fit(X_train, y_train)
+
+y_pred = grid.predict(X_test)
+
+best_params = grid.best_params_
+  #+end_src
+
+  #+RESULTS: 96444CFC-F47E-4F80-8C46-9B03CBC25A33
+
+
+  #+NAME: 80D4F982-F09B-4DB6-B60D-737D8FFA3255
+  #+begin_src ein-python :results output
+print("Random Forest \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
+      format("=" * 35, 
+             mean_squared_error(y_test, y_pred), 
+             mean_absolute_error(y_test, y_pred)
+             )
+      )
+  #+end_src
+
+  #+RESULTS: 80D4F982-F09B-4DB6-B60D-737D8FFA3255
+  : Random Forest 
+  : ===================================
+  : 
+  :  Mean Squared Error: 319662.2463548567 
+  :  Mean Absolute Error : 95.21187549897539
+
+
+  #+RESULTS: 50C3A21E-78C8-4118-84B8-E14EFBC8B001
+  : SVR 
+  : ===================================
+  : 
+  :  Mean Squared Error: 8775565821.677137 
+  :  Mean Absolute Error : 58317.993981713655
+
+  : Baseline - Simple Mean 
+  : ===================================
+  : 
+  :  Mean Squared Error: 798737443.6172509 
+  :  Mean Absolute Error : 28195.73404389957
+
+  Sensible improvement. Possibly strong non-linearities captured by the
+  decision Tree Regressor.
+
+*** TODO Classical Times Series Models
+
+    This are skipped here at this stage. These models you have
+    extensively studied at Uni. Focus on the new.
+
+*** Try a multivariate LSTM model
+
+ Notice that LSTM accepts 3D arrays arguments
+
+ #+NAME: DB53B5FA-8760-47FC-8D08-922B38DD9F7B
+ #+BEGIN_SRC ein-python  :results output
+features_mat.columns
+ #+END_SRC
+
+ Notice that here I remove categorical variables as keras does not know
+ how to deal out of the box with them. You should hot_encode them
+ manually or put them in a numeric fashion if you want to incorporate
+ them.
+
+ #+NAME: 07C62635-5E5E-4516-A087-AE50839625D5
+ #+begin_src ein-python :results output
+# X_train, X_test, y_train, y_test = train_test_split(features_mat[[x for x in features_mat.columns if x not in ['y_revenue', 
+#                                                                                                                'country',
+#                                                                                                                'date']]], 
+#                                                     np.array(features_mat[['y_revenue']]),
+#                                                     test_size = 0.3,
+#                                                     shuffle = False,
+# 						    random_state = 1)
+ #+end_src
+
+
+ #+NAME: 2848C2B2-5218-4A0C-B6AA-C4AB5AEEF7B8
+ #+begin_src ein-python :results output
+# reshape input to be 3D [samples, timesteps, features]
+X_train = np.array (X_train) .reshape((X_train.shape[0], 1, X_train.shape[1]))
+X_test = np.array (X_test).reshape((X_test.shape[0], 1, X_test.shape[1]))
+print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
+ #+end_src
+
+ #+RESULTS: 2848C2B2-5218-4A0C-B6AA-C4AB5AEEF7B8
+ : (3858, 1, 7) (3858,) (1654, 1, 7) (1654,)
+
+ #+NAME: 0E93D24B-37B0-4BD3-80E3-DFDE6E8F3B8C
+ #+BEGIN_SRC ein-python  :results output
+from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.models import Sequential
+ #+END_SRC
+
+ #+RESULTS: 0E93D24B-37B0-4BD3-80E3-DFDE6E8F3B8C
+
+ #+NAME: 50F65769-C2E5-4EA6-ABD7-10FF0A2DD15B
+ #+begin_src ein-python :results output
+# design network
+model = Sequential()
+model.add(LSTM(50, input_shape=(X_train.shape[1], X_train.shape[2])))
+model.add(Dense(1))
+model.compile(loss='mae', optimizer='adam')
+# fit network
+history = model.fit(X_train, y_train, epochs=100, batch_size=142, validation_data=(X_test, y_test), verbose=2, shuffle=False)
+ #+end_src
+
+ #+RESULTS: 50F65769-C2E5-4EA6-ABD7-10FF0A2DD15B
+ #+begin_example
+Epoch 1/100
+
+28/28 - 0s - loss: 182993.6250 - val_loss: 182986.2031
+
+Epoch 2/100
+28/28 - 0s - loss: 182993.2969 - val_loss: 182985.8906
+
+Epoch 3/100
+28/28 - 0s - loss: 182992.9688 - val_loss: 182985.5781
+
+Epoch 4/100
+
+28/28 - 0s - loss: 182992.7031 - val_loss: 182985.3125
+
+Epoch 5/100
+
+28/28 - 0s - loss: 182992.4375 - val_loss: 182985.0469
+
+Epoch 6/100
+
+28/28 - 0s - loss: 182992.1406 - val_loss: 182984.7812
+
+Epoch 7/100
+
+28/28 - 0s - loss: 182991.8594 - val_loss: 182984.5156
+
+Epoch 8/100
+
+28/28 - 0s - loss: 182991.6094 - val_loss: 182984.2344
+
+Epoch 9/100
+
+28/28 - 0s - loss: 182991.3594 - val_loss: 182983.9688
+
+Epoch 10/100
+
+28/28 - 0s - loss: 182991.0625 - val_loss: 182983.7031
+
+Epoch 11/100
+
+28/28 - 0s - loss: 182990.7969 - val_loss: 182983.4531
+
+Epoch 12/100
+
+28/28 - 0s - loss: 182990.5469 - val_loss: 182983.1719
+
+Epoch 13/100
+
+28/28 - 0s - loss: 182990.2656 - val_loss: 182982.9062
+
+Epoch 14/100
+
+28/28 - 0s - loss: 182989.9844 - val_loss: 182982.6406
+
+Epoch 15/100
+
+28/28 - 0s - loss: 182989.7188 - val_loss: 182982.3594
+
+Epoch 16/100
+
+28/28 - 0s - loss: 182989.4531 - val_loss: 182982.0938
+
+Epoch 17/100
+
+28/28 - 0s - loss: 182989.1875 - val_loss: 182981.8281
+
+Epoch 18/100
+
+28/28 - 0s - loss: 182988.9062 - val_loss: 182981.5781
+
+Epoch 19/100
+
+28/28 - 0s - loss: 182988.6406 - val_loss: 182981.2969
+
+Epoch 20/100
+
+28/28 - 0s - loss: 182988.3906 - val_loss: 182981.0469
+
+Epoch 21/100
+
+28/28 - 0s - loss: 182988.0938 - val_loss: 182980.7656
+
+Epoch 22/100
+
+28/28 - 0s - loss: 182987.8438 - val_loss: 182980.5312
+
+Epoch 23/100
+
+28/28 - 0s - loss: 182987.5781 - val_loss: 182980.2344
+
+Epoch 24/100
+
+28/28 - 0s - loss: 182987.2969 - val_loss: 182979.9688
+
+Epoch 25/100
+
+28/28 - 0s - loss: 182987.0312 - val_loss: 182979.7188
+
+Epoch 26/100
+
+28/28 - 0s - loss: 182986.7969 - val_loss: 182979.4219
+
+Epoch 27/100
+
+28/28 - 0s - loss: 182986.5156 - val_loss: 182979.1719
+
+Epoch 28/100
+
+28/28 - 0s - loss: 182986.2031 - val_loss: 182978.9219
+
+Epoch 29/100
+
+28/28 - 0s - loss: 182985.9531 - val_loss: 182978.6562
+
+Epoch 30/100
+
+28/28 - 0s - loss: 182985.6719 - val_loss: 182978.3750
+
+Epoch 31/100
+
+28/28 - 0s - loss: 182985.4219 - val_loss: 182978.1094
+
+Epoch 32/100
+
+28/28 - 0s - loss: 182985.1562 - val_loss: 182977.8594
+
+Epoch 33/100
+
+28/28 - 0s - loss: 182984.9062 - val_loss: 182977.5938
+
+Epoch 34/100
+
+28/28 - 0s - loss: 182984.6094 - val_loss: 182977.3125
+
+Epoch 35/100
+
+28/28 - 0s - loss: 182984.3594 - val_loss: 182977.0625
+
+Epoch 36/100
+
+28/28 - 0s - loss: 182984.0938 - val_loss: 182976.7969
+
+Epoch 37/100
+
+28/28 - 0s - loss: 182983.7969 - val_loss: 182976.5156
+
+Epoch 38/100
+
+28/28 - 0s - loss: 182983.5625 - val_loss: 182976.2656
+
+Epoch 39/100
+
+28/28 - 0s - loss: 182983.2969 - val_loss: 182975.9844
+
+Epoch 40/100
+
+28/28 - 0s - loss: 182982.9688 - val_loss: 182975.7344
+
+Epoch 41/100
+
+28/28 - 0s - loss: 182982.7344 - val_loss: 182975.4531
+
+Epoch 42/100
+
+28/28 - 0s - loss: 182982.4531 - val_loss: 182975.1875
+
+Epoch 43/100
+
+28/28 - 0s - loss: 182982.2344 - val_loss: 182974.9375
+
+Epoch 44/100
+
+28/28 - 0s - loss: 182981.9531 - val_loss: 182974.6719
+
+Epoch 45/100
+
+28/28 - 0s - loss: 182981.6719 - val_loss: 182974.3906
+
+Epoch 46/100
+
+28/28 - 0s - loss: 182981.4219 - val_loss: 182974.1406
+
+Epoch 47/100
+
+28/28 - 0s - loss: 182981.1406 - val_loss: 182973.8750
+
+Epoch 48/100
+
+28/28 - 0s - loss: 182980.8750 - val_loss: 182973.5781
+
+Epoch 49/100
+
+28/28 - 0s - loss: 182980.6250 - val_loss: 182973.3281
+
+Epoch 50/100
+
+28/28 - 0s - loss: 182980.3594 - val_loss: 182973.0625
+
+Epoch 51/100
+
+28/28 - 0s - loss: 182980.0469 - val_loss: 182972.8125
+
+Epoch 52/100
+
+28/28 - 0s - loss: 182979.8125 - val_loss: 182972.5312
+
+Epoch 53/100
+
+28/28 - 0s - loss: 182979.5312 - val_loss: 182972.2500
+
+Epoch 54/100
+
+28/28 - 0s - loss: 182979.2500 - val_loss: 182972.0000
+
+Epoch 55/100
+
+28/28 - 0s - loss: 182979.0000 - val_loss: 182971.7500
+
+Epoch 56/100
+
+28/28 - 0s - loss: 182978.7344 - val_loss: 182971.4844
+
+Epoch 57/100
+
+28/28 - 0s - loss: 182978.4219 - val_loss: 182971.2188
+
+Epoch 58/100
+
+28/28 - 0s - loss: 182978.2188 - val_loss: 182970.9531
+
+Epoch 59/100
+
+28/28 - 0s - loss: 182977.9219 - val_loss: 182970.6719
+
+Epoch 60/100
+
+28/28 - 0s - loss: 182977.6562 - val_loss: 182970.4062
+
+Epoch 61/100
+
+28/28 - 0s - loss: 182977.3750 - val_loss: 182970.1406
+
+Epoch 62/100
+
+28/28 - 0s - loss: 182977.1406 - val_loss: 182969.8906
+
+Epoch 63/100
+
+28/28 - 0s - loss: 182976.8281 - val_loss: 182969.6094
+
+Epoch 64/100
+
+28/28 - 0s - loss: 182976.5938 - val_loss: 182969.3438
+
+Epoch 65/100
+
+28/28 - 0s - loss: 182976.3125 - val_loss: 182969.0781
+
+Epoch 66/100
+
+28/28 - 0s - loss: 182976.0469 - val_loss: 182968.7969
+
+Epoch 67/100
+
+28/28 - 0s - loss: 182975.7969 - val_loss: 182968.5312
+
+Epoch 68/100
+
+28/28 - 0s - loss: 182975.5000 - val_loss: 182968.2969
+
+Epoch 69/100
+
+28/28 - 0s - loss: 182975.2656 - val_loss: 182968.0156
+
+Epoch 70/100
+
+28/28 - 0s - loss: 182975.0000 - val_loss: 182967.7656
+
+Epoch 71/100
+
+28/28 - 0s - loss: 182974.7031 - val_loss: 182967.4844
+
+Epoch 72/100
+
+28/28 - 0s - loss: 182974.4219 - val_loss: 182967.2188
+
+Epoch 73/100
+
+28/28 - 0s - loss: 182974.1719 - val_loss: 182966.9531
+
+Epoch 74/100
+
+28/28 - 0s - loss: 182973.8906 - val_loss: 182966.6875
+
+Epoch 75/100
+
+28/28 - 0s - loss: 182973.6562 - val_loss: 182966.4375
+
+Epoch 76/100
+
+28/28 - 0s - loss: 182973.3594 - val_loss: 182966.1562
+
+Epoch 77/100
+
+28/28 - 0s - loss: 182973.0938 - val_loss: 182965.9062
+
+Epoch 78/100
+
+28/28 - 0s - loss: 182972.8281 - val_loss: 182965.6094
+
+Epoch 79/100
+
+28/28 - 0s - loss: 182972.5781 - val_loss: 182965.3594
+
+Epoch 80/100
+
+28/28 - 0s - loss: 182972.2656 - val_loss: 182965.0938
+
+Epoch 81/100
+
+28/28 - 0s - loss: 182972.0469 - val_loss: 182964.8125
+
+Epoch 82/100
+
+28/28 - 0s - loss: 182971.7500 - val_loss: 182964.5625
+
+Epoch 83/100
+
+28/28 - 0s - loss: 182971.4844 - val_loss: 182964.2969
+
+Epoch 84/100
+
+28/28 - 0s - loss: 182971.2344 - val_loss: 182964.0469
+
+Epoch 85/100
+
+28/28 - 0s - loss: 182970.9531 - val_loss: 182963.7656
+
+Epoch 86/100
+
+28/28 - 0s - loss: 182970.6719 - val_loss: 182963.5000
+
+Epoch 87/100
+
+28/28 - 0s - loss: 182970.4219 - val_loss: 182963.2344
+
+Epoch 88/100
+
+28/28 - 0s - loss: 182970.1250 - val_loss: 182962.9531
+
+Epoch 89/100
+
+28/28 - 0s - loss: 182969.8906 - val_loss: 182962.7344
+
+Epoch 90/100
+
+28/28 - 0s - loss: 182969.6250 - val_loss: 182962.4375
+
+Epoch 91/100
+
+28/28 - 0s - loss: 182969.3594 - val_loss: 182962.1719
+
+Epoch 92/100
+
+28/28 - 0s - loss: 182969.1094 - val_loss: 182961.9219
+
+Epoch 93/100
+
+28/28 - 0s - loss: 182968.8125 - val_loss: 182961.6406
+
+Epoch 94/100
+
+28/28 - 0s - loss: 182968.5469 - val_loss: 182961.3594
+
+Epoch 95/100
+
+28/28 - 0s - loss: 182968.2812 - val_loss: 182961.1250
+
+Epoch 96/100
+
+28/28 - 0s - loss: 182968.0312 - val_loss: 182960.8438
+
+Epoch 97/100
+
+28/28 - 0s - loss: 182967.7344 - val_loss: 182960.5625
+
+Epoch 98/100
+
+28/28 - 0s - loss: 182967.4688 - val_loss: 182960.3281
+
+Epoch 99/100
+
+28/28 - 0s - loss: 182967.2031 - val_loss: 182960.0312
+
+Epoch 100/100
+
+28/28 - 0s - loss: 182966.9375 - val_loss: 182959.7812
+ #+end_example
+
+ #+NAME: DA9C7EB4-EE8F-42AC-AE5E-F6B6A0EA6D22
+ #+begin_src ein-python :results output
+model.compile(loss='mse', optimizer='adam')
+history2 = model.fit(X_train, y_train, epochs=100, batch_size=142, validation_data=(X_test, y_test), verbose=2, shuffle=False)
+ #+end_src
+
+ #+RESULTS: DA9C7EB4-EE8F-42AC-AE5E-F6B6A0EA6D22
+ #+begin_example
+Epoch 1/100
+
+28/28 - 0s - loss: 41784913920.0000 - val_loss: 41774653440.0000
+
+Epoch 2/100
+28/28 - 0s - loss: 41784811520.0000 - val_loss: 41774567424.0000
+
+Epoch 3/100
+28/28 - 0s - loss: 41784717312.0000 - val_loss: 41774469120.0000
+
+Epoch 4/100
+
+28/28 - 0s - loss: 41784623104.0000 - val_loss: 41774374912.0000
+
+Epoch 5/100
+
+28/28 - 0s - loss: 41784528896.0000 - val_loss: 41774284800.0000
+
+Epoch 6/100
+
+28/28 - 0s - loss: 41784434688.0000 - val_loss: 41774186496.0000
+
+Epoch 7/100
+
+28/28 - 0s - loss: 41784340480.0000 - val_loss: 41774092288.0000
+
+Epoch 8/100
+
+28/28 - 0s - loss: 41784242176.0000 - val_loss: 41773993984.0000
+
+Epoch 9/100
+
+28/28 - 0s - loss: 41784147968.0000 - val_loss: 41773907968.0000
+
+Epoch 10/100
+
+28/28 - 0s - loss: 41784057856.0000 - val_loss: 41773813760.0000
+
+Epoch 11/100
+
+28/28 - 0s - loss: 41783955456.0000 - val_loss: 41773715456.0000
+
+Epoch 12/100
+
+28/28 - 0s - loss: 41783873536.0000 - val_loss: 41773621248.0000
+
+Epoch 13/100
+
+28/28 - 0s - loss: 41783771136.0000 - val_loss: 41773531136.0000
+
+Epoch 14/100
+
+28/28 - 0s - loss: 41783668736.0000 - val_loss: 41773424640.0000
+
+Epoch 15/100
+
+28/28 - 0s - loss: 41783566336.0000 - val_loss: 41773326336.0000
+
+Epoch 16/100
+
+28/28 - 0s - loss: 41783463936.0000 - val_loss: 41773232128.0000
+
+Epoch 17/100
+
+28/28 - 0s - loss: 41783369728.0000 - val_loss: 41773142016.0000
+
+Epoch 18/100
+
+28/28 - 0s - loss: 41783279616.0000 - val_loss: 41773043712.0000
+
+Epoch 19/100
+
+28/28 - 0s - loss: 41783181312.0000 - val_loss: 41772949504.0000
+
+Epoch 20/100
+
+28/28 - 0s - loss: 41783087104.0000 - val_loss: 41772855296.0000
+
+Epoch 21/100
+
+28/28 - 0s - loss: 41782996992.0000 - val_loss: 41772761088.0000
+
+Epoch 22/100
+
+28/28 - 0s - loss: 41782898688.0000 - val_loss: 41772666880.0000
+
+Epoch 23/100
+
+28/28 - 0s - loss: 41782800384.0000 - val_loss: 41772576768.0000
+
+Epoch 24/100
+
+28/28 - 0s - loss: 41782710272.0000 - val_loss: 41772478464.0000
+
+Epoch 25/100
+
+28/28 - 0s - loss: 41782607872.0000 - val_loss: 41772380160.0000
+
+Epoch 26/100
+
+28/28 - 0s - loss: 41782513664.0000 - val_loss: 41772290048.0000
+
+Epoch 27/100
+
+28/28 - 0s - loss: 41782415360.0000 - val_loss: 41772199936.0000
+
+Epoch 28/100
+
+28/28 - 0s - loss: 41782325248.0000 - val_loss: 41772101632.0000
+
+Epoch 29/100
+
+28/28 - 0s - loss: 41782235136.0000 - val_loss: 41772007424.0000
+
+Epoch 30/100
+
+28/28 - 0s - loss: 41782145024.0000 - val_loss: 41771909120.0000
+
+Epoch 31/100
+
+28/28 - 0s - loss: 41782042624.0000 - val_loss: 41771823104.0000
+
+Epoch 32/100
+
+28/28 - 0s - loss: 41781952512.0000 - val_loss: 41771728896.0000
+
+Epoch 33/100
+
+28/28 - 0s - loss: 41781846016.0000 - val_loss: 41771630592.0000
+
+Epoch 34/100
+
+28/28 - 0s - loss: 41781747712.0000 - val_loss: 41771536384.0000
+
+Epoch 35/100
+
+28/28 - 0s - loss: 41781657600.0000 - val_loss: 41771438080.0000
+
+Epoch 36/100
+
+28/28 - 0s - loss: 41781567488.0000 - val_loss: 41771347968.0000
+
+Epoch 37/100
+
+28/28 - 0s - loss: 41781473280.0000 - val_loss: 41771257856.0000
+
+Epoch 38/100
+
+28/28 - 0s - loss: 41781379072.0000 - val_loss: 41771163648.0000
+
+Epoch 39/100
+
+28/28 - 0s - loss: 41781280768.0000 - val_loss: 41771069440.0000
+
+Epoch 40/100
+
+28/28 - 0s - loss: 41781190656.0000 - val_loss: 41770967040.0000
+
+Epoch 41/100
+
+28/28 - 0s - loss: 41781100544.0000 - val_loss: 41770881024.0000
+
+Epoch 42/100
+
+28/28 - 0s - loss: 41780998144.0000 - val_loss: 41770782720.0000
+
+Epoch 43/100
+
+28/28 - 0s - loss: 41780908032.0000 - val_loss: 41770684416.0000
+
+Epoch 44/100
+
+28/28 - 0s - loss: 41780805632.0000 - val_loss: 41770594304.0000
+
+Epoch 45/100
+
+28/28 - 0s - loss: 41780711424.0000 - val_loss: 41770500096.0000
+
+Epoch 46/100
+
+28/28 - 0s - loss: 41780613120.0000 - val_loss: 41770405888.0000
+
+Epoch 47/100
+
+28/28 - 0s - loss: 41780523008.0000 - val_loss: 41770311680.0000
+
+Epoch 48/100
+
+28/28 - 0s - loss: 41780428800.0000 - val_loss: 41770225664.0000
+
+Epoch 49/100
+
+28/28 - 0s - loss: 41780334592.0000 - val_loss: 41770119168.0000
+
+Epoch 50/100
+
+28/28 - 0s - loss: 41780240384.0000 - val_loss: 41770029056.0000
+
+Epoch 51/100
+
+28/28 - 0s - loss: 41780142080.0000 - val_loss: 41769930752.0000
+
+Epoch 52/100
+
+28/28 - 0s - loss: 41780051968.0000 - val_loss: 41769840640.0000
+
+Epoch 53/100
+
+28/28 - 0s - loss: 41779949568.0000 - val_loss: 41769746432.0000
+
+Epoch 54/100
+
+28/28 - 0s - loss: 41779855360.0000 - val_loss: 41769648128.0000
+
+Epoch 55/100
+
+28/28 - 0s - loss: 41779765248.0000 - val_loss: 41769558016.0000
+
+Epoch 56/100
+
+28/28 - 0s - loss: 41779666944.0000 - val_loss: 41769463808.0000
+
+Epoch 57/100
+
+28/28 - 0s - loss: 41779572736.0000 - val_loss: 41769373696.0000
+
+Epoch 58/100
+
+28/28 - 0s - loss: 41779474432.0000 - val_loss: 41769275392.0000
+
+Epoch 59/100
+
+28/28 - 0s - loss: 41779380224.0000 - val_loss: 41769181184.0000
+
+Epoch 60/100
+
+28/28 - 0s - loss: 41779294208.0000 - val_loss: 41769086976.0000
+
+Epoch 61/100
+
+28/28 - 0s - loss: 41779195904.0000 - val_loss: 41768992768.0000
+
+Epoch 62/100
+
+28/28 - 0s - loss: 41779093504.0000 - val_loss: 41768894464.0000
+
+Epoch 63/100
+
+28/28 - 0s - loss: 41779007488.0000 - val_loss: 41768800256.0000
+
+Epoch 64/100
+
+28/28 - 0s - loss: 41778905088.0000 - val_loss: 41768710144.0000
+
+Epoch 65/100
+
+28/28 - 0s - loss: 41778806784.0000 - val_loss: 41768615936.0000
+
+Epoch 66/100
+
+28/28 - 0s - loss: 41778716672.0000 - val_loss: 41768525824.0000
+
+Epoch 67/100
+
+28/28 - 0s - loss: 41778622464.0000 - val_loss: 41768427520.0000
+
+Epoch 68/100
+
+28/28 - 0s - loss: 41778524160.0000 - val_loss: 41768333312.0000
+
+Epoch 69/100
+
+28/28 - 0s - loss: 41778434048.0000 - val_loss: 41768239104.0000
+
+Epoch 70/100
+
+28/28 - 0s - loss: 41778339840.0000 - val_loss: 41768140800.0000
+
+Epoch 71/100
+
+28/28 - 0s - loss: 41778241536.0000 - val_loss: 41768046592.0000
+
+Epoch 72/100
+
+28/28 - 0s - loss: 41778155520.0000 - val_loss: 41767956480.0000
+
+Epoch 73/100
+
+28/28 - 0s - loss: 41778057216.0000 - val_loss: 41767862272.0000
+
+Epoch 74/100
+
+28/28 - 0s - loss: 41777954816.0000 - val_loss: 41767768064.0000
+
+Epoch 75/100
+
+28/28 - 0s - loss: 41777856512.0000 - val_loss: 41767673856.0000
+
+Epoch 76/100
+
+28/28 - 0s - loss: 41777766400.0000 - val_loss: 41767579648.0000
+
+Epoch 77/100
+
+28/28 - 0s - loss: 41777668096.0000 - val_loss: 41767489536.0000
+
+Epoch 78/100
+
+28/28 - 0s - loss: 41777573888.0000 - val_loss: 41767387136.0000
+
+Epoch 79/100
+
+28/28 - 0s - loss: 41777475584.0000 - val_loss: 41767297024.0000
+
+Epoch 80/100
+
+28/28 - 0s - loss: 41777389568.0000 - val_loss: 41767202816.0000
+
+Epoch 81/100
+
+28/28 - 0s - loss: 41777291264.0000 - val_loss: 41767108608.0000
+
+Epoch 82/100
+
+28/28 - 0s - loss: 41777188864.0000 - val_loss: 41767010304.0000
+
+Epoch 83/100
+
+28/28 - 0s - loss: 41777106944.0000 - val_loss: 41766920192.0000
+
+Epoch 84/100
+
+28/28 - 0s - loss: 41777004544.0000 - val_loss: 41766825984.0000
+
+Epoch 85/100
+
+28/28 - 0s - loss: 41776906240.0000 - val_loss: 41766735872.0000
+
+Epoch 86/100
+
+28/28 - 0s - loss: 41776816128.0000 - val_loss: 41766633472.0000
+
+Epoch 87/100
+
+28/28 - 0s - loss: 41776717824.0000 - val_loss: 41766543360.0000
+
+Epoch 88/100
+
+28/28 - 0s - loss: 41776623616.0000 - val_loss: 41766449152.0000
+
+Epoch 89/100
+
+28/28 - 0s - loss: 41776529408.0000 - val_loss: 41766354944.0000
+
+Epoch 90/100
+
+28/28 - 0s - loss: 41776427008.0000 - val_loss: 41766260736.0000
+
+Epoch 91/100
+
+28/28 - 0s - loss: 41776336896.0000 - val_loss: 41766162432.0000
+
+Epoch 92/100
+
+28/28 - 0s - loss: 41776242688.0000 - val_loss: 41766072320.0000
+
+Epoch 93/100
+
+28/28 - 0s - loss: 41776152576.0000 - val_loss: 41765978112.0000
+
+Epoch 94/100
+
+28/28 - 0s - loss: 41776050176.0000 - val_loss: 41765883904.0000
+
+Epoch 95/100
+
+28/28 - 0s - loss: 41775960064.0000 - val_loss: 41765789696.0000
+
+Epoch 96/100
+
+28/28 - 0s - loss: 41775861760.0000 - val_loss: 41765695488.0000
+
+Epoch 97/100
+
+28/28 - 0s - loss: 41775775744.0000 - val_loss: 41765601280.0000
+
+Epoch 98/100
+
+28/28 - 0s - loss: 41775677440.0000 - val_loss: 41765511168.0000
+
+Epoch 99/100
+
+28/28 - 0s - loss: 41775575040.0000 - val_loss: 41765408768.0000
+
+Epoch 100/100
+
+28/28 - 0s - loss: 41775489024.0000 - val_loss: 41765318656.0000
+ #+end_example
+
+
+ #+NAME: C8A10AC4-B512-4466-948E-C7FCD723B43F
+ #+begin_src ein-python :results output
+print("LSTM \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
+      format("=" * 35, 
+             history2.history['val_loss'][-1], 
+             history.history['val_loss'][-1])
+             )
+ #+end_src
+
+ #+RESULTS: C8A10AC4-B512-4466-948E-C7FCD723B43F
+ : LSTM 
+ : ===================================
+ : 
+ :  Mean Squared Error: 41765318656.0 
+ :  Mean Absolute Error : 182959.78125
+
+  : Random Forest 
+  : ===================================
+  : 
+  :  Mean Squared Error: 319662.2463548567 
+  :  Mean Absolute Error : 95.21187549897539
+
+  : SVR 
+  : ===================================
+  : 
+  :  Mean Squared Error: 8775565821.677137 
+  :  Mean Absolute Error : 58317.993981713655
+
+  : Baseline - Simple Mean 
+  : ===================================
+  : 
+  :  Mean Squared Error: 798737443.6172509 
+  :  Mean Absolute Error : 28195.73404389957
+
+
+ So LSTM provides a benefit over the baseline. Still performs worst
+ than a simple decision Forest. Given the linear improvement of the
+ estimation in the epochs I assume that there is still some work to be
+ done with the model before bringing this into production.
+
+ #+NAME: 3CF4092D-042F-49A0-88A9-ECFAA11B3607
+ #+begin_src ein-python :results output
+# plot history
+plt.plot(history2.history['loss'], label='train')
+plt.plot(history2.history['val_loss'], label='test')
+plt.legend()
+plt.show()
+ #+end_src
+
+ #+RESULTS: 3CF4092D-042F-49A0-88A9-ECFAA11B3607
+ [[file:ein-images/ob-ein-7ef43fddec77f062c6593d1a17846fc6.png]]
+
+   
+** TODO 
+
+*** add deal with missing values. simpleimputer?
+
+*** TODO do a post about the wasserstein metric.  
+
+    check how the movement of the mass is defined there. 
+
