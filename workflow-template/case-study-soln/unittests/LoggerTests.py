@@ -42,6 +42,7 @@ class LoggerTest(unittest.TestCase):
         update_train_log(data_shape,eval_test, runtime,
                          model_version, model_version_note ,test=True)
 
+        #test that the logging creates the new file.
         self.assertTrue(os.path.exists(log_file))
         
     def test_02_train(self):
@@ -68,7 +69,7 @@ class LoggerTest(unittest.TestCase):
 
     def test_03_predict(self):
         """
-        ensure log file is created
+        ensure log file is created; prediction
         """
 
         log_file = os.path.join("logs","predict-test.log")

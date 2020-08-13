@@ -34,9 +34,10 @@ def train_model(X,y,saved_model):
     ## retrain using all data
     clf.fit(X, y)
     print("... saving model: {}".format(saved_model))
-    joblib.dump(clf,saved_model)
+    joblib.dump(clf,saved_model) ## you pass the saved_model string
+                                 ## with the specificiations of the
+                                 ## model, i.e. version etc.
 
-    
 def _update_predict_log(y_pred,y_proba,query,runtime):
     """
     update predict log file

@@ -1,28 +1,70 @@
-import time,os,re,csv,sys,uuid,joblib
-from datetime import date
-import numpy as np
-from sklearn import svm
-from sklearn import datasets
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
+## To deal with files and OS
+import os
+import sys
+import shutil
 
-## model specific variables (iterate the version and note with each change)
+import joblib
+
+## For date manipulation
+import time
+from datetime import datetime
+
+## Regular Expression
+import re
+
+## Standard data manipulation libraries
+import numpy as np
+import pandas as pd
+
+## Customized functions
+import functions
+
+## For model Estimation
+from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.impute import SimpleImputer
+
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.tree import DecisionTreeRegressor
+
+# Path to data directory.
+WRKDIR = "./"
+DATADIR = WRKDIR + "ai-workflow-capstone/cs-train/"
+
+## model specific variables (iterate the version and note with each
+## change)
 MODEL_VERSION = 0.1
 MODEL_VERSION_NOTE = "example random forest on toy data"
 SAVED_MODEL = "model-{}.joblib".format(re.sub("\.","_",str(MODEL_VERSION)))
 
 def fetch_data():
     """
-    example function to fetch data for training
+    fetch the data for training your model
     """
-    
-    ## import some data to play with
-    iris = datasets.load_iris()
-    X = iris.data[:,:2]
-    y = iris.target
 
-    return(X,y)
-    
+    df = functions.fetch_data (DATADIR)
+
+
+    max_countries = df[["country", "price"]].groupby (df["country"]). \
+                      sum ().sort_values (by = "price",
+                                          ascending = False).index[:10]
+
+    df_max_country = df[df.country.map (lambda x: x in max_countries)]
+
+    # create aggregate data
+    df_aggregate = functions.convert_df_to_ts (df, max_countries)
+
+    # create our feature matrix. here mainly lagged variables
+    features_mat = functions.engineer_features(df_aggregate,
+                                           training = 0)
+
+    return(features_mat)
+
+    ## add test checking that countries are <= 10
+
 def model_train(mode=None):
     """
     example funtion to train model
@@ -31,22 +73,43 @@ def model_train(mode=None):
     """
 
     ## data ingestion
-    X,y = fetch_data()
+    df = fetch_data()
 
     ## Perform a train-test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(df[0], 
+                                                        df[1],
+                                                        test_size = 0.3,
+                                                        shuffle = False,
+                                                        random_state = 1)
 
-    ## Specify parameters and model
-    params = {'C':1.0,'kernel':'linear','gamma':0.5}
-    clf = svm.SVC(probability=True)
+    ## preprocessing pipeline
+    cat_features = [x for x in X_train.columns if x not in X_train.describe().columns]
+    num_features = list(X_train.describe().columns)
 
-    ## fit model on training data
-    clf = clf.fit(X_train, y_train)
+    numeric_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='mean')),
+        ('scaler', StandardScaler())])
+
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numeric_transformer, num_features),
+            ('cat', categorical_transformer, cat_features)])
+
+    pipe_dtree = Pipeline(steps = 
+                    [
+                        ('pre', preprocessor),
+                        ('dtree', DecisionTreeRegressor(max_depth = 15))
+                    ])
+
+    clf = pipe_dtree.fit(X_train, y_train)
+
     y_pred = clf.predict(X_test)
-    print(classification_report(y_test,y_pred))
 
-    ## retrain using all data
-    clf.fit(X, y)
     print("... saving model: {}".format(SAVED_MODEL))
     joblib.dump(clf,SAVED_MODEL)
 
@@ -69,18 +132,23 @@ def model_predict(query,model=None):
     ## load model if needed
     if not model:
         model = model_load()
-    
+
+    query = np.array(query)
+
     ## output checking
-    if len(query.shape) == 1:
-        query = query.reshape(1, -1)
-    
+    query = query.reshape(1, -1)
+
+    query = pd.DataFrame(query)
+
+    query.columns = ['previous_7', 'previous_14',
+                     'previous_28', 'previous_70',
+                     'previous_year', 'recent_invoices',
+                     'recent_views']
+
     ## make prediction and gather data for log entry
     y_pred = model.predict(query)
-    y_proba = None
-    if 'predict_proba' in dir(model) and model.probability == True:
-        y_proba = model.predict_proba(query)
         
-    return({'y_pred':y_pred,'y_proba':y_proba})
+    return(y_pred)
 
 if __name__ == "__main__":
 
@@ -93,12 +161,18 @@ if __name__ == "__main__":
 
     ## load the model
     model = model_load()
-    
+
+    ex1 = [3.18669700e+04, 5.83556410e+04,
+           1.42086181e+05, 3.53433941e+05,
+           9.06022210e+04, 6.19666667e+00,
+           5.77430000e+02]
+
+    ex2 = [3.89, 5.78,
+           7.42086181, 9.42086181,
+           2.1904, 6.1966,
+           1.7743]
+
     ## example predict
-    for query in [np.array([[6.1,2.8]]), np.array([[7.7,2.5]]), np.array([[5.8,3.8]])]:
-        result = model_predict(query,model)
-        y_pred = result['y_pred']
+    for query in [ex1, ex2]:
+        y_pred = model_predict(query,model)
         print("predicted: {}".format(y_pred))
-
-
-

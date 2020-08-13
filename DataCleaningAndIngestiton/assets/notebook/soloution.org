@@ -1,0 +1,745 @@
+** Case Study - Data ingestion
+   :PROPERTIES:
+   :CUSTOM_ID: case-study---data-ingestion
+   :END:
+
+The goal of this case study is to put into practice the important
+takeaways from module 1. We will go through the basic process that
+begins with refining the business opportunity and ensuring that it is
+articulated using a scientific thought process.
+
+The business opportunity and case study was first mentioned in Unit 2 of
+module 1 and like the AAVIAL company itself these data were created for
+learning purposes. We will be using the AAVAIL example as a basis for
+this case study. [[https://vimeo.com/348708995][Watch the video again]]
+if you need a refresher. You will be gathering data from several
+provided sources, staging it for quality assurance and saving it in a
+target destination that makes sense in this context.
+
+Watch the video to review the important concepts from the units you just
+covered and to see an overview of the objectives for this case study.
+
+#+BEGIN_SRC python
+  from IPython.display import IFrame    
+  IFrame('https://www.youtube.com/embed/NpEaa2P7qZI', width=600,height=400)
+#+END_SRC
+
+#+BEGIN_HTML
+  <iframe width="600" height="400" src="https://www.youtube.com/embed/NpEaa2P7qZI" frameborder="0" allowfullscreen>
+#+END_HTML
+
+#+BEGIN_HTML
+  </iframe>
+#+END_HTML
+
+*** Case study objectives
+    :PROPERTIES:
+    :CUSTOM_ID: case-study-objectives
+    :END:
+
+1. Given a business opportunity gather relevant data from multiple
+   sources
+2. Clean the gathered data
+3. Create a script that gathers and cleans the data
+
+*** Getting started
+    :PROPERTIES:
+    :CUSTOM_ID: getting-started
+    :END:
+
+Download this notebook and open it either locally using a Jupyter server
+or use your IBM cloud account to login to Watson Studio. Inside of
+Waston Studio cloud if you have not already ensure that this notebook is
+loaded as part of the /project/ for this course.
+
+*You will need the following files to complete this case study*
+
+- [[file:m1-u6-case-study.ipynb]]
+- [[./notebooks/m1-u6-case-study-solution.ipynb][m1-u6-case-study-solution.ipynb]]
+- [[./data/aavail-customers.db][aavail-customers.db]]
+- [[./data/aavail-streams.csv][aavail-steams.csv]]
+
+1. Fill in all of the places in this notebook marked with */YOUR CODE
+   HERE/* or */YOUR ANSWER HERE/*
+2. When you have finished the case study there will be a short quiz
+
+You may review the rest of this content as part of the notebook, but
+once your are ready to get started be ensure that you are working with a
+/live/ version either as part of Watson Studio or locally.
+
+The data you will be sourcing from is contained in two sources.
+
+1. A database ([[https://www.sqlite.org/index.html][SQLite]]) of
+   =customer= data
+
+2. A [[https://en.wikipedia.org/wiki/Comma-separated_values][CSV file]]
+   of =stream= level data
+
+   #+BEGIN_QUOTE
+     You will create a simple data pipeline that
+   #+END_QUOTE
+
+   1) simplifies the data for future analysis and
+   2) performs quality assurance checks.
+
+The process of building /the data ingestion pipeline/ entails extracting
+data, transforming it, and loading into an appropriate data storage
+technology. When constructing a pipeline it is important to keep in mind
+that they generally works in batches. Data may be compiled during the
+day and the batch could be processed during the night. The data pipeline
+may also be optimized to execute as a streaming computation that is,
+every event is handled as it occurs.
+
+*** PART 1: Gathering the data
+    :PROPERTIES:
+    :CUSTOM_ID: part-1-gathering-the-data
+    :END:
+
+The following is an
+[[https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model][Entity
+Relationship Diagram (ERD)]] that details the tables and contents of the
+database.
+
+#+BEGIN_SRC python
+  ## all the imports you will need for this case study
+  import os
+  import pandas as pd
+  import numpy as np
+  import sqlite3
+#+END_SRC
+
+Much of the data exists in a database. You can connect to is using the
+=sqlite3= package with the following function. Note that is is good
+practice to wrap your connect functions in a
+[[https://docs.python.org/3/tutorial/errors.html][try-except statement]]
+to cleanly handle exceptions.
+
+#+BEGIN_SRC python
+  def connect_db(file_path):
+      try:
+          conn = sqlite3.connect(file_path)
+          print("...successfully connected to db\n")
+      except Error as e:
+          print("...unsuccessful connection\n",e)
+      
+      return(conn)
+#+END_SRC
+
+#+BEGIN_SRC python
+  ## make the connection to the database
+  conn = connect_db('./data/aavail-customers.db')
+
+  ## print the table names
+  tables = [t[0] for t in conn.execute("SELECT name FROM sqlite_master WHERE type='table';")]
+  print(tables)
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+  ...successfully connected to db
+
+  ['CUSTOMERS', 'INVOICES', 'INVOICE_ITEMS']
+#+END_EXAMPLE
+
+**** QUESTION 1:
+     :PROPERTIES:
+     :CUSTOM_ID: question-1
+     :END:
+
+*extract the relevant data from the DB*
+
+Query the database and extract the following data into a
+[[https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html][Pandas
+DataFrame]].
+
+- Customer ID (integer)
+- Last name
+- First name
+- DOB
+- City
+- State
+- Country (the name NOT the country_id)
+- Gender
+
+Remember that that SQL is case-insensitive, but it is traditional to use
+ALL CAPS for SQL keywords. It is also a convention to end SQL statements
+with a semi-colon.
+
+***** Resources
+      :PROPERTIES:
+      :CUSTOM_ID: resources
+      :END:
+
+- [[https://www.w3schools.com/sql][W3 schools SQL tutorial]]
+- [[https://www.w3schools.com/sql/sql_join.asp][W3 schools SQL joins]]
+
+#+BEGIN_SRC python
+  ## YOUR CODE HERE
+
+#+END_SRC
+
+**** QUESTION 2:
+     :PROPERTIES:
+     :CUSTOM_ID: question-2
+     :END:
+
+*Extract the relevant data from the CSV file*
+
+For each =customer_id= determine if a customer has stopped their
+subscription or not and save it in a dictionary or another data
+container.
+
+#+BEGIN_SRC python
+  df_streams = pd.read_csv(r"./data/aavail-streams.csv")
+  df_streams.head()
+#+END_SRC
+
+#+BEGIN_HTML
+  <style scoped>
+      .dataframe tbody tr th:only-of-type {
+          vertical-align: middle;
+      }
+
+      .dataframe tbody tr th {
+          vertical-align: top;
+      }
+
+      .dataframe thead th {
+          text-align: right;
+      }
+  </style>
+#+END_HTML
+
+#+BEGIN_HTML
+  <table border="1" class="dataframe">
+#+END_HTML
+
+#+BEGIN_HTML
+  <thead>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tr style="text-align: right;">
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+customer_id
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+stream_id
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+date
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+subscription_stopped
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  </thead>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tbody>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+0
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1356
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+2018-12-01
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+0
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+1
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1540
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+2018-12-04
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+0
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+2
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1395
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+2018-12-11
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+0
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+3
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1255
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+2018-12-22
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+0
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  <th>
+#+END_HTML
+
+4
+
+#+BEGIN_HTML
+  </th>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+1697
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+2018-12-23
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  <td>
+#+END_HTML
+
+0
+
+#+BEGIN_HTML
+  </td>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tr>
+#+END_HTML
+
+#+BEGIN_HTML
+  </tbody>
+#+END_HTML
+
+#+BEGIN_HTML
+  </table>
+#+END_HTML
+
+#+BEGIN_SRC python
+  ## YOUR CODE HERE
+#+END_SRC
+
+*** PART 2: Cleaning the data
+    :PROPERTIES:
+    :CUSTOM_ID: part-2-cleaning-the-data
+    :END:
+
+Sometimes it is known in advance which types of data integrity issues to
+expect, but other times it is during the Exploratory Data Analysis (EDA)
+process that these issues are identified. After extracting data it is
+important to include checks for quality assurance even on the first pass
+through the AI workflow. Here you will combine the data into a single
+structure and provide a couple checks for quality assurance.
+
+**** QUESTION 3:
+     :PROPERTIES:
+     :CUSTOM_ID: question-3
+     :END:
+
+*Implement checks for quality assurance*
+
+1. Remove any repeat customers based on =customer_id=
+2. Remove stream data that do not have an associated =stream_id=
+
+#+BEGIN_SRC python
+  ## YOUR CODE HERE
+
+#+END_SRC
+
+**** QUESTION 4:
+     :PROPERTIES:
+     :CUSTOM_ID: question-4
+     :END:
+
+*combine the data into a single data structure*
+
+For this example, the two most convenient structures for this task are
+Pandas dataframes and NumPy arrays. At a minimum ensure that your
+structure accommodates the following.
+
+1. A column for =customer_id=
+2. A column for =country=
+3. A column for =age= that is created from =DOB=
+4. A column =customer_name= that is created from =first_name= and
+   =last_name=
+5. A column to indicate churn called =is_subscriber=
+6. A column that indicates =subscriber_type= that comes from
+   =invoice_item=
+7. A column to indicate the total =num_streams=
+
+***** Resources
+      :PROPERTIES:
+      :CUSTOM_ID: resources-1
+      :END:
+
+- [[https://docs.python.org/3/library/datetime.html][Python's datetime
+  library]]
+- [[https://docs.scipy.org/doc/numpy/reference/arrays.datetime.html][NumPy's
+  datetime data type]]
+
+#+BEGIN_SRC python
+  ## YOUR CODE HERE
+
+#+END_SRC
+
+*** PART 3: Automating the process
+    :PROPERTIES:
+    :CUSTOM_ID: part-3-automating-the-process
+    :END:
+
+To ensure that you code can be used to automate this process. First you
+will save you dataframe or numpy array as a CSV file.
+
+**** QUESTION 5:
+     :PROPERTIES:
+     :CUSTOM_ID: question-5
+     :END:
+
+*Take the initial steps towards automation*
+
+1. Save your cleaned, combined data as a CSV file.
+2. From the code above create a function or class that performs all of
+   the steps given a database file and a streams CSV file.
+3. Run the function in batches and write a check to ensure you got the
+   same result that you did in the code above.
+
+There will be some logic involved to ensure that you do not write the
+same data twice to the target CSV file.
+
+Shown below is some code that will split your streams file into two
+batches.
+
+#+BEGIN_SRC python
+  ## code to split the streams csv into batches
+  data_dir = os.path.join(".","data")
+  df_all = pd.read_csv(os.path.join(data_dir,"aavail-streams.csv"))
+  half = int(round(df_all.shape[0] * 0.5))
+  df_part1 = df_all[:half]
+  df_part2 = df_all[half:]
+  df_part1.to_csv(os.path.join(data_dir,"aavail-streams-1.csv"),index=False)
+  df_part2.to_csv(os.path.join(data_dir,"aavail-streams-2.csv"),index=False)
+#+END_SRC
+
+You will need to save your function as a file. The following cell
+demonstrates how to do this from within a notebook.
+
+#+BEGIN_SRC python
+  %%writefile aavail-data-ingestor.py
+  #!/usr/bin/env python
+
+  import os
+  import pandas as pd
+  import numpy as np
+  import sqlite3
+
+  data_dir = os.path.join(".","data")
+
+  pass
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+  Overwriting aavail-data-ingestor.py
+#+END_EXAMPLE
+
+You will also need to be able to pass the file names to your function
+without hardcoding them into the script itself. This is an important
+step towards automation. Here are the two libraries commonly used to
+accomplish this in Python.
+
+- [[https://docs.python.org/3/library/getopt.html][getopt]]
+- [[https://docs.python.org/3/library/argparse.html][argparse]]
+
+You may run the script you just created from the commandline directly or
+from within this notebook using:
+
+#+BEGIN_SRC python
+  !python aavail-data-ingestor.py aavail-customers.db aavail-streams-1.csv
+#+END_SRC
+
+Run the script once for each batch that you created and then load both
+the original and batch versions back into the notebook to check that
+they are the same.
+
+#+BEGIN_SRC python
+  ## YOUR CODE HERE
+
+#+END_SRC
+
+**** QUESTION 6:
+     :PROPERTIES:
+     :CUSTOM_ID: question-6
+     :END:
+
+*How can you improve the process?*
+
+In paragraph form or using bullets write down some of the ways that you
+could improve this pipeline.
+
+YOUR ANSWER HERE
+
+#+BEGIN_SRC python
+#+END_SRC

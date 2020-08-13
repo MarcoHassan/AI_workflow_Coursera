@@ -36,6 +36,8 @@ def predict():
     basic predict function for the API
     """
 
+    print(request.json)
+
     ## input checking
     if not request.json:
         print("ERROR: API (predict): did not receive request data")
@@ -97,8 +99,7 @@ def train():
     print("... training complete")
 
     return(jsonify(True))
-        
-    
+
 if __name__ == '__main__':
 
 

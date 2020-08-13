@@ -13,24 +13,24 @@ class ModelTest(unittest.TestCase):
     test the essential functionality
     """
         
-    def test_01_train(self):
-        """
-        test the train functionality
-        """
+    # def test_01_train(self):
+    #     """
+    #     test the train functionality
+    #     """
 
-        ## train the model
-        model_train()
-        self.assertTrue(os.path.exists(SAVED_MODEL))
+    #     ## train the model
+    #     model_train()
+    #     self.assertTrue(os.path.exists(SAVED_MODEL))
 
-    def test_02_load(self):
-        """
-        test the train functionality
-        """
+    # def test_02_load(self):
+    #     """
+    #     test the train functionality
+    #     """
                         
-        ## load the model
-        model = model_load()
-        self.assertTrue('predict' in dir(model))
-        self.assertTrue('fit' in dir(model))
+    #     ## load the model
+    #     model = model_load()
+    #     self.assertTrue('predict' in dir(model))
+    #     self.assertTrue('fit' in dir(model))
 
     def test_03_predict(self):
         """

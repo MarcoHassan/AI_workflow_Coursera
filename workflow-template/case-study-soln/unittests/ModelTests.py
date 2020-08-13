@@ -3,6 +3,14 @@
 model tests
 """
 
+import warnings
+warnings.filterwarnings("ignore")
+
+import sys
+
+paths = ['/Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/workflow-template/case-study-soln/']
+paths.extend(sys.path)
+sys.path = paths
 
 import unittest
 
@@ -14,25 +22,25 @@ class ModelTest(unittest.TestCase):
     test the essential functionality
     """
         
-    def test_01_train(self):
-        """
-        test the train functionality
-        """
+    # def test_01_train(self):
+    #     """
+    #     test the train functionality
+    #     """
 
-        ## train the model
-        model_train(test=True)
-        self.assertTrue(os.path.exists(SAVED_MODEL))
+    #     ## train the model
+    #     model_train(test=True)
+    #     self.assertTrue(os.path.exists(SAVED_MODEL))
 
-    def test_02_load(self):
-        """
-        test the train functionality
-        """
+    # def test_02_load(self):
+    #     """
+    #     test the train functionality
+    #     """
                         
-        ## train the model
-        model = model_load()
+    #     ## train the model
+    #     model = model_load()
         
-        self.assertTrue('predict' in dir(model))
-        self.assertTrue('fit' in dir(model))
+    #     self.assertTrue('predict' in dir(model))
+    #     self.assertTrue('fit' in dir(model))
 
        
     def test_03_predict(self):
@@ -44,13 +52,10 @@ class ModelTest(unittest.TestCase):
         model = model_load()
     
         ## ensure that a list can be passed
-        query = {'country': ['united_states','singapore','united_states'],
-                 'age': [24,42,20],
-                 'subscriber_type': ['aavail_basic','aavail_premium','aavail_basic'],
-                 'num_streams': [8,17,14]
-        }
+        query_data = np.array([[6.1,2.8]])
+        query_data = query_data.tolist()
 
-        result = model_predict(query,model,test=True)
+        result = model_predict(query_data,model,test=True)
         y_pred = result['y_pred']
         self.assertTrue(y_pred[0] in [0,1])
 

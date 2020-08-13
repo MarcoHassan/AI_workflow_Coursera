@@ -100,7 +100,7 @@ def model_train(test=False):
     pipe = Pipeline(steps=[('pre', preprocessor),
                            ('clf',clf)])
     
-    grid = GridSearchCV(pipe, param_grid=param_grid, cv=5, iid=False, n_jobs=-1)
+    grid = GridSearchCV(pipe, param_grid=param_grid, cv=5)
     grid.fit(X_train, y_train)
     params = grid.best_params_
     params = {re.sub("clf__","",key):value for key,value in params.items()}
@@ -144,7 +144,9 @@ def model_predict(query,model=None,test=False):
 
     ## start timer for runtime
     time_start = time.time()
-    
+
+    query = pd.DataFrame(query)
+
     ## input checks
     if isinstance(query,dict):
         query = pd.DataFrame(query)
@@ -153,11 +155,11 @@ def model_predict(query,model=None,test=False):
     else:
         raise Exception("ERROR (model_predict) - invalid input. {} was given".format(type(query)))
 
-    ## features check
-    features = sorted(query.columns.tolist())
-    if features != ['age', 'country', 'num_streams', 'subscriber_type']:
-        print("query features: {}".format(",".join(features)))
-        raise Exception("ERROR (model_predict) - invalid features present") 
+    # ## features check
+    # features = sorted(query.columns.tolist())
+    # if features != ['age', 'country', 'num_streams', 'subscriber_type']:
+    #     print("query features: {}".format(",".join(features)))
+    #     raise Exception("ERROR (model_predict) - invalid features present") 
     
     ## load model if needed
     if not model:
@@ -166,6 +168,8 @@ def model_predict(query,model=None,test=False):
     ## output checking
     if len(query.shape) == 1:
         query = query.reshape(1, -1)
+
+    print(query)
     
     ## make prediction and gather data for log entry
     y_pred = model.predict(query)
@@ -214,6 +218,8 @@ if __name__ == "__main__":
                           'subscriber_type': ['aavail_basic','aavail_premium','aavail_basic'],
                           'num_streams': [8,17,14]
     })
+
+    print(query)
 
     result = model_predict(query,model,test=True)
     y_pred = result['y_pred']

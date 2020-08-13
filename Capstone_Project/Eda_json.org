@@ -3,15 +3,13 @@
 :header-args:ein-python: :session http://127.0.0.1:8888/EDA.ipynb
 :end: 
 
-
 ** Global Paramters
 
- #+NAME: CFF5932E-86F6-4C31-9932-BEB2F70EDBA5
+ #+NAME: A4F2CD83-A7EA-4661-B3DF-4EF6F32D3161
  #+begin_src ein-python :results output
 WRKDIR = "/Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/"
 DATADIR = WRKDIR + "ai-workflow-capstone/cs-train/"
  #+end_src
-
 
 ** Libraries
 
@@ -61,7 +59,6 @@ import math
 #!END_LIB
 #+end_src
 
-
 ** Import functions
 
 Import the python package with your user-defined functions.
@@ -70,7 +67,6 @@ Import the python package with your user-defined functions.
 #+begin_src ein-python :results output
 import functions
 #+end_src
-
 
 ** Display Options
 
@@ -83,7 +79,6 @@ pd.set_option('display.width', 1000)
 np.set_printoptions(threshold=np.inf)
 #+end_src
 
-
 ** ETL - Extract, Transform and Load
 
 #+NAME: F6FF40D4-81CF-4C08-BDA9-30D37927D5CA
@@ -91,6 +86,49 @@ np.set_printoptions(threshold=np.inf)
 df = functions.fetch_data (DATADIR)
 #+END_SRC
 
+#+RESULTS: F6FF40D4-81CF-4C08-BDA9-30D37927D5CA
+#+begin_example
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-01.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2017-12.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-01.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-11.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-07.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-06.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-07.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-06.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-10.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-09.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-04.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-05.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-12.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-04.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-05.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-08.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-02.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-03.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2017-11.json
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2018-02.json
+
+Fetching ..../Users/marcohassan/Desktop/Learning/AI_workflow_Coursera/Capstone_Project/ai-workflow-capstone/cs-train/invoices-2019-03.json
+#+end_example
 
 ** EDA 
 
@@ -109,6 +147,14 @@ print (df.isnull().sum(axis = 0))
 #+begin_src ein-python :results output
 df.head (5)
 #+end_src
+
+#+RESULTS: 6830D2FD-47F3-4FAE-BF51-060BC5F6200E
+:           country customer_id  day invoice  month  price stream_id  times_viewed  year invoice_date
+: 0  United Kingdom       17998   28  489562     11   5.95     84656             1  2017   2017-11-28
+: 1  United Kingdom       13085   28  489434     11   6.75    79323W            12  2017   2017-11-28
+: 2  United Kingdom       13085   28  489434     11   2.10     22041            21  2017   2017-11-28
+: 3  United Kingdom       13085   28  489434     11   1.25     21232             5  2017   2017-11-28
+: 4  United Kingdom       13085   28  489434     11   1.65     22064            17  2017   2017-11-28
 
 *** Split Categorical And Numeric Variables
 
@@ -151,6 +197,9 @@ df.columns
 df.customer_id[df.customer_id.isnull()].head (5)
 #+end_src
 
+#+RESULTS: 1C0AFFC8-4090-4E46-B5A0-65ED33A714D1
+: Series([], Name: customer_id, dtype: object)
+
 #+NAME: 7E3FCBC7-0DCA-45EB-92E2-EDAD33F1AFB9
 #+begin_src ein-python :results output
 df.loc[df.customer_id[df.customer_id.isnull()].index, "customer_id"] = 'noID'
@@ -162,6 +211,14 @@ df.isnull ().sum (axis = 0)
 #+end_src
 
 *** 10 Countries with higher sales
+
+#+NAME: A8870111-C29E-4D93-911A-19B7C8F19B25
+#+BEGIN_SRC ein-python  :results output
+df[["country", "price"]].groupby (df["country"]).sum ().sort_values (by = "price", ascending = False).index[:10]
+#+END_SRC
+
+#+RESULTS: A8870111-C29E-4D93-911A-19B7C8F19B25
+: 10
 
  #+NAME: 57015F06-859F-466A-8DE6-EA0D92FB8A7D
  #+begin_src ein-python :results output
@@ -221,7 +278,7 @@ df_max_country.dtypes
 #+end_src
 
 *** Visualization
-
+    
 #+NAME: 6576AC4E-2CF2-43B0-9DE4-2ADD25829499
 #+begin_src ein-python :results output
 q = \
@@ -257,7 +314,6 @@ k1 = sns.violinplot(data = df_rev_year, x = 'year', y = 'revenue', hue = "month"
 Notice moreover that you do not have entries for each month in every
 year
 
-
 ** Convert to Times Series the Series for the Top 10 countries
 
 #+NAME: DEC93A22-FBE9-44F3-B271-E257148A2B3D
@@ -289,6 +345,7 @@ g = g.map_upper(sns.scatterplot, alpha = 0.3)
 g = g.map_lower(sns.kdeplot)
 g = g.map_diag(plt.hist, lw=2, alpha = 0.2).add_legend()
 #+end_src
+
 n[[file:ein-images/ob-ein-7acdeade1676a91a92d672aa07232032.png]]
 
 Notice that the sample is highly dominated by the United Kingdom. In
@@ -323,6 +380,7 @@ cmap = sns.diverging_palette(220, 10, as_cmap=True)
 sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
 	    square=True, linewidths=.5, cbar_kws={"shrink": .5})
 #+end_src
+
 [[file:ein-images/ob-ein-388e0643eb2e641234f4b02c32f268a6.png]]
 
 
@@ -411,7 +469,6 @@ for test_country in max_countries:
       demographics etc. Like this you might be able to analyze
       non-intuitive correlation structure.
 
-
 ** Feature Engineering and Model Estimation
 
 #+NAME: 6E39B5DA-FD3D-4E4D-A84D-1673670DB386
@@ -428,8 +485,6 @@ features_mat = functions.engineer_features(df_aggregate,
                                            training = 0)
 #+end_src
 
-#+RESULTS: 6E39B5DA-FD3D-4E4D-A84D-1673670DB386
-
 Given the above it is now possible to estimate the revenues in the
 next month. Either for the different countries separately merging then
 in a final step the results or directly at the aggregated level.
@@ -438,16 +493,6 @@ in a final step the results or directly at the aggregated level.
 #+begin_src ein-python :results output
 features_mat[0].dtypes
 #+end_src
-
-#+RESULTS: 7E090F65-4579-4565-98E0-A0A9642E6774
-: previous_7         float64
-: previous_14        float64
-: previous_28        float64
-: previous_70        float64
-: previous_year      float64
-: recent_invoices    float64
-: recent_views       float64
-: dtype: object
 
 Notice that recent invoices and recent views were computed based on
 the average value of the =unique_views= and =total_views= for the
@@ -458,7 +503,6 @@ Try some basic training technique
 #+NAME: 73BB109D-3F71-48B1-909F-C25ADB416A1B
 #+begin_src ein-python :results output
 #!START_LIB
-from sklearn.utils import shuffle
 from sklearn.model_selection import train_test_split, GridSearchCV
 
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -513,11 +557,41 @@ print (y_test[:10])
 print (features_mat[1][int (len (features_mat[1])*0.7) :int(len (features_mat[1])*0.7) + 10])
 #+end_src
 
-#+RESULTS: 0037EF68-223D-4A5C-9DBC-EE93049E556A
-: [184410.25 188673.1  184697.43 185624.39 181006.64 182722.73 182722.73
-:  186264.56 192054.46 170509.28]
-: [184410.25 188673.1  184697.43 185624.39 181006.64 182722.73 182722.73
-:  186264.56 192054.46 170509.28]
+
+#+NAME: 1D19C3E2-4A46-40F6-9B4D-C295DDC9535B
+#+begin_src ein-python :results output
+ex2 = [3.89, 5.78,
+       7.42086181, 9.42086181,
+       2.1904, 6.1966,
+       1.7743]
+#+end_src
+
+#+RESULTS: 1D19C3E2-4A46-40F6-9B4D-C295DDC9535B
+
+
+#+NAME: 6881DF88-CF16-4E63-A504-8EE989C86957
+#+begin_src ein-python :results output
+query = np.array(ex2)
+
+print (query.shape) 
+
+query = query.reshape(1, -1)
+
+query = pd.DataFrame(query)
+
+query.columns = ['previous_7', 'previous_14',
+		 'previous_28', 'previous_70',
+		 'previous_year', 'recent_invoices',
+		 'recent_views']
+
+clf.predict (query)
+#+end_src
+
+#+RESULTS: 6881DF88-CF16-4E63-A504-8EE989C86957
+: (7,)
+: 
+: array([182494.164])
+
 
 *** Regression Exercise - Not Considering Temporal Structure in the Data 
 
@@ -534,13 +608,6 @@ print("Baseline - Simple Mean \n{}\n\n Mean Squared Error: {} \n Mean Absolute E
              )
       )
   #+end_src
-
-  #+RESULTS: 1F2983EC-B46F-4A65-9760-6962B9D8308B
-  : Baseline - Simple Mean 
-  : ===================================
-  : 
-  :  Mean Squared Error: 8310335694.523872 
-  :  Mean Absolute Error : 62620.103359555316
 
   So just a marginal improvement over a very rough baseline
 
@@ -600,20 +667,6 @@ y_pred = grid.predict(X_test)
 best_params = grid.best_params_
   #+end_src
 
-  #+RESULTS: 17194981-3BF6-40A4-8B1E-9BFE5E6B0DA9
-  #+begin_example
-
- NameErrorTraceback (most recent call last)
- <ipython-input-164-ca5ca507b34c> in <module>
-       6                     [
-       7                         ('pre', preprocessor),
- ----> 8                         ('dtree', Decisiontreeregressor(kernel = 'rbf'))
-       9                     ])
-      10 
-
- NameError: name 'Decisiontreeregressor' is not defined
-  #+end_example
-
   Check at the summary statistics
 
   #+NAME: 50C3A21E-78C8-4118-84B8-E14EFBC8B001
@@ -626,25 +679,12 @@ print("SVR \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
       )
   #+end_src
 
-  #+RESULTS: 50C3A21E-78C8-4118-84B8-E14EFBC8B001
-  : SVR 
-  : ===================================
-  : 
-  :  Mean Squared Error: 8775565821.677137 
-  :  Mean Absolute Error : 58317.993981713655
-
-  : Baseline - Simple Mean 
-  : ===================================
-  : 
-  :  Mean Squared Error: 798737443.6172509 
-  :  Mean Absolute Error : 28195.73404389957
-
  Not working at all. Even worsening the performance. 
 
 **** Random Forest
 
   #+NAME: 96444CFC-F47E-4F80-8C46-9B03CBC25A33
-  #+begin_src ein-python :results output
+ #+begin_src ein-python :results output
 param_grid_tree = {
       'dtree__max_depth': [4,5,6,7,8,9,10,12,14,15],
 }
@@ -668,6 +708,24 @@ best_params = grid.best_params_
 
   #+RESULTS: 96444CFC-F47E-4F80-8C46-9B03CBC25A33
 
+#+NAME: F4F5730B-37CD-4F31-BD45-4A5D56C2206B
+#+BEGIN_SRC ein-python  :results output
+# features_mat[0].dtypes
+y_pred = grid.predict(X_test)
+#+END_SRC
+
+#+RESULTS: F4F5730B-37CD-4F31-BD45-4A5D56C2206B
+
+
+#+NAME: 6EA1716C-7DC9-4D84-B8FA-88EE9CDCF653
+#+begin_src ein-python :results output
+np.array (X_test.iloc[0,:]) 
+#+end_src
+
+#+RESULTS: 6EA1716C-7DC9-4D84-B8FA-88EE9CDCF653
+: array([3.18669700e+04, 5.83556410e+04, 1.42086181e+05, 3.53433941e+05,
+:        9.06022210e+04, 6.19666667e+00, 5.77430000e+02])
+
 
   #+NAME: 80D4F982-F09B-4DB6-B60D-737D8FFA3255
   #+begin_src ein-python :results output
@@ -683,25 +741,11 @@ print("Random Forest \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}
   : Random Forest 
   : ===================================
   : 
-  :  Mean Squared Error: 319662.2463548567 
-  :  Mean Absolute Error : 95.21187549897539
+  :  Mean Squared Error: 319662.2463548565 
+  :  Mean Absolute Error : 95.2118754989748
 
-
-  #+RESULTS: 50C3A21E-78C8-4118-84B8-E14EFBC8B001
-  : SVR 
-  : ===================================
-  : 
-  :  Mean Squared Error: 8775565821.677137 
-  :  Mean Absolute Error : 58317.993981713655
-
-  : Baseline - Simple Mean 
-  : ===================================
-  : 
-  :  Mean Squared Error: 798737443.6172509 
-  :  Mean Absolute Error : 28195.73404389957
-
-  Sensible improvement. Possibly strong non-linearities captured by the
-  decision Tree Regressor.
+  Sensible improvement. Possibly strong non-linearities captured by
+  the decision Tree Regressor.
 
 *** TODO Classical Times Series Models
 
@@ -714,7 +758,7 @@ print("Random Forest \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}
 
  #+NAME: DB53B5FA-8760-47FC-8D08-922B38DD9F7B
  #+BEGIN_SRC ein-python  :results output
-features_mat.columns
+features_mat[0].columns
  #+END_SRC
 
  Notice that here I remove categorical variables as keras does not know
@@ -742,16 +786,11 @@ X_test = np.array (X_test).reshape((X_test.shape[0], 1, X_test.shape[1]))
 print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
  #+end_src
 
- #+RESULTS: 2848C2B2-5218-4A0C-B6AA-C4AB5AEEF7B8
- : (3858, 1, 7) (3858,) (1654, 1, 7) (1654,)
-
  #+NAME: 0E93D24B-37B0-4BD3-80E3-DFDE6E8F3B8C
  #+BEGIN_SRC ein-python  :results output
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.models import Sequential
  #+END_SRC
-
- #+RESULTS: 0E93D24B-37B0-4BD3-80E3-DFDE6E8F3B8C
 
  #+NAME: 50F65769-C2E5-4EA6-ABD7-10FF0A2DD15B
  #+begin_src ein-python :results output
@@ -764,814 +803,11 @@ model.compile(loss='mae', optimizer='adam')
 history = model.fit(X_train, y_train, epochs=100, batch_size=142, validation_data=(X_test, y_test), verbose=2, shuffle=False)
  #+end_src
 
- #+RESULTS: 50F65769-C2E5-4EA6-ABD7-10FF0A2DD15B
- #+begin_example
-Epoch 1/100
-
-28/28 - 0s - loss: 182993.6250 - val_loss: 182986.2031
-
-Epoch 2/100
-28/28 - 0s - loss: 182993.2969 - val_loss: 182985.8906
-
-Epoch 3/100
-28/28 - 0s - loss: 182992.9688 - val_loss: 182985.5781
-
-Epoch 4/100
-
-28/28 - 0s - loss: 182992.7031 - val_loss: 182985.3125
-
-Epoch 5/100
-
-28/28 - 0s - loss: 182992.4375 - val_loss: 182985.0469
-
-Epoch 6/100
-
-28/28 - 0s - loss: 182992.1406 - val_loss: 182984.7812
-
-Epoch 7/100
-
-28/28 - 0s - loss: 182991.8594 - val_loss: 182984.5156
-
-Epoch 8/100
-
-28/28 - 0s - loss: 182991.6094 - val_loss: 182984.2344
-
-Epoch 9/100
-
-28/28 - 0s - loss: 182991.3594 - val_loss: 182983.9688
-
-Epoch 10/100
-
-28/28 - 0s - loss: 182991.0625 - val_loss: 182983.7031
-
-Epoch 11/100
-
-28/28 - 0s - loss: 182990.7969 - val_loss: 182983.4531
-
-Epoch 12/100
-
-28/28 - 0s - loss: 182990.5469 - val_loss: 182983.1719
-
-Epoch 13/100
-
-28/28 - 0s - loss: 182990.2656 - val_loss: 182982.9062
-
-Epoch 14/100
-
-28/28 - 0s - loss: 182989.9844 - val_loss: 182982.6406
-
-Epoch 15/100
-
-28/28 - 0s - loss: 182989.7188 - val_loss: 182982.3594
-
-Epoch 16/100
-
-28/28 - 0s - loss: 182989.4531 - val_loss: 182982.0938
-
-Epoch 17/100
-
-28/28 - 0s - loss: 182989.1875 - val_loss: 182981.8281
-
-Epoch 18/100
-
-28/28 - 0s - loss: 182988.9062 - val_loss: 182981.5781
-
-Epoch 19/100
-
-28/28 - 0s - loss: 182988.6406 - val_loss: 182981.2969
-
-Epoch 20/100
-
-28/28 - 0s - loss: 182988.3906 - val_loss: 182981.0469
-
-Epoch 21/100
-
-28/28 - 0s - loss: 182988.0938 - val_loss: 182980.7656
-
-Epoch 22/100
-
-28/28 - 0s - loss: 182987.8438 - val_loss: 182980.5312
-
-Epoch 23/100
-
-28/28 - 0s - loss: 182987.5781 - val_loss: 182980.2344
-
-Epoch 24/100
-
-28/28 - 0s - loss: 182987.2969 - val_loss: 182979.9688
-
-Epoch 25/100
-
-28/28 - 0s - loss: 182987.0312 - val_loss: 182979.7188
-
-Epoch 26/100
-
-28/28 - 0s - loss: 182986.7969 - val_loss: 182979.4219
-
-Epoch 27/100
-
-28/28 - 0s - loss: 182986.5156 - val_loss: 182979.1719
-
-Epoch 28/100
-
-28/28 - 0s - loss: 182986.2031 - val_loss: 182978.9219
-
-Epoch 29/100
-
-28/28 - 0s - loss: 182985.9531 - val_loss: 182978.6562
-
-Epoch 30/100
-
-28/28 - 0s - loss: 182985.6719 - val_loss: 182978.3750
-
-Epoch 31/100
-
-28/28 - 0s - loss: 182985.4219 - val_loss: 182978.1094
-
-Epoch 32/100
-
-28/28 - 0s - loss: 182985.1562 - val_loss: 182977.8594
-
-Epoch 33/100
-
-28/28 - 0s - loss: 182984.9062 - val_loss: 182977.5938
-
-Epoch 34/100
-
-28/28 - 0s - loss: 182984.6094 - val_loss: 182977.3125
-
-Epoch 35/100
-
-28/28 - 0s - loss: 182984.3594 - val_loss: 182977.0625
-
-Epoch 36/100
-
-28/28 - 0s - loss: 182984.0938 - val_loss: 182976.7969
-
-Epoch 37/100
-
-28/28 - 0s - loss: 182983.7969 - val_loss: 182976.5156
-
-Epoch 38/100
-
-28/28 - 0s - loss: 182983.5625 - val_loss: 182976.2656
-
-Epoch 39/100
-
-28/28 - 0s - loss: 182983.2969 - val_loss: 182975.9844
-
-Epoch 40/100
-
-28/28 - 0s - loss: 182982.9688 - val_loss: 182975.7344
-
-Epoch 41/100
-
-28/28 - 0s - loss: 182982.7344 - val_loss: 182975.4531
-
-Epoch 42/100
-
-28/28 - 0s - loss: 182982.4531 - val_loss: 182975.1875
-
-Epoch 43/100
-
-28/28 - 0s - loss: 182982.2344 - val_loss: 182974.9375
-
-Epoch 44/100
-
-28/28 - 0s - loss: 182981.9531 - val_loss: 182974.6719
-
-Epoch 45/100
-
-28/28 - 0s - loss: 182981.6719 - val_loss: 182974.3906
-
-Epoch 46/100
-
-28/28 - 0s - loss: 182981.4219 - val_loss: 182974.1406
-
-Epoch 47/100
-
-28/28 - 0s - loss: 182981.1406 - val_loss: 182973.8750
-
-Epoch 48/100
-
-28/28 - 0s - loss: 182980.8750 - val_loss: 182973.5781
-
-Epoch 49/100
-
-28/28 - 0s - loss: 182980.6250 - val_loss: 182973.3281
-
-Epoch 50/100
-
-28/28 - 0s - loss: 182980.3594 - val_loss: 182973.0625
-
-Epoch 51/100
-
-28/28 - 0s - loss: 182980.0469 - val_loss: 182972.8125
-
-Epoch 52/100
-
-28/28 - 0s - loss: 182979.8125 - val_loss: 182972.5312
-
-Epoch 53/100
-
-28/28 - 0s - loss: 182979.5312 - val_loss: 182972.2500
-
-Epoch 54/100
-
-28/28 - 0s - loss: 182979.2500 - val_loss: 182972.0000
-
-Epoch 55/100
-
-28/28 - 0s - loss: 182979.0000 - val_loss: 182971.7500
-
-Epoch 56/100
-
-28/28 - 0s - loss: 182978.7344 - val_loss: 182971.4844
-
-Epoch 57/100
-
-28/28 - 0s - loss: 182978.4219 - val_loss: 182971.2188
-
-Epoch 58/100
-
-28/28 - 0s - loss: 182978.2188 - val_loss: 182970.9531
-
-Epoch 59/100
-
-28/28 - 0s - loss: 182977.9219 - val_loss: 182970.6719
-
-Epoch 60/100
-
-28/28 - 0s - loss: 182977.6562 - val_loss: 182970.4062
-
-Epoch 61/100
-
-28/28 - 0s - loss: 182977.3750 - val_loss: 182970.1406
-
-Epoch 62/100
-
-28/28 - 0s - loss: 182977.1406 - val_loss: 182969.8906
-
-Epoch 63/100
-
-28/28 - 0s - loss: 182976.8281 - val_loss: 182969.6094
-
-Epoch 64/100
-
-28/28 - 0s - loss: 182976.5938 - val_loss: 182969.3438
-
-Epoch 65/100
-
-28/28 - 0s - loss: 182976.3125 - val_loss: 182969.0781
-
-Epoch 66/100
-
-28/28 - 0s - loss: 182976.0469 - val_loss: 182968.7969
-
-Epoch 67/100
-
-28/28 - 0s - loss: 182975.7969 - val_loss: 182968.5312
-
-Epoch 68/100
-
-28/28 - 0s - loss: 182975.5000 - val_loss: 182968.2969
-
-Epoch 69/100
-
-28/28 - 0s - loss: 182975.2656 - val_loss: 182968.0156
-
-Epoch 70/100
-
-28/28 - 0s - loss: 182975.0000 - val_loss: 182967.7656
-
-Epoch 71/100
-
-28/28 - 0s - loss: 182974.7031 - val_loss: 182967.4844
-
-Epoch 72/100
-
-28/28 - 0s - loss: 182974.4219 - val_loss: 182967.2188
-
-Epoch 73/100
-
-28/28 - 0s - loss: 182974.1719 - val_loss: 182966.9531
-
-Epoch 74/100
-
-28/28 - 0s - loss: 182973.8906 - val_loss: 182966.6875
-
-Epoch 75/100
-
-28/28 - 0s - loss: 182973.6562 - val_loss: 182966.4375
-
-Epoch 76/100
-
-28/28 - 0s - loss: 182973.3594 - val_loss: 182966.1562
-
-Epoch 77/100
-
-28/28 - 0s - loss: 182973.0938 - val_loss: 182965.9062
-
-Epoch 78/100
-
-28/28 - 0s - loss: 182972.8281 - val_loss: 182965.6094
-
-Epoch 79/100
-
-28/28 - 0s - loss: 182972.5781 - val_loss: 182965.3594
-
-Epoch 80/100
-
-28/28 - 0s - loss: 182972.2656 - val_loss: 182965.0938
-
-Epoch 81/100
-
-28/28 - 0s - loss: 182972.0469 - val_loss: 182964.8125
-
-Epoch 82/100
-
-28/28 - 0s - loss: 182971.7500 - val_loss: 182964.5625
-
-Epoch 83/100
-
-28/28 - 0s - loss: 182971.4844 - val_loss: 182964.2969
-
-Epoch 84/100
-
-28/28 - 0s - loss: 182971.2344 - val_loss: 182964.0469
-
-Epoch 85/100
-
-28/28 - 0s - loss: 182970.9531 - val_loss: 182963.7656
-
-Epoch 86/100
-
-28/28 - 0s - loss: 182970.6719 - val_loss: 182963.5000
-
-Epoch 87/100
-
-28/28 - 0s - loss: 182970.4219 - val_loss: 182963.2344
-
-Epoch 88/100
-
-28/28 - 0s - loss: 182970.1250 - val_loss: 182962.9531
-
-Epoch 89/100
-
-28/28 - 0s - loss: 182969.8906 - val_loss: 182962.7344
-
-Epoch 90/100
-
-28/28 - 0s - loss: 182969.6250 - val_loss: 182962.4375
-
-Epoch 91/100
-
-28/28 - 0s - loss: 182969.3594 - val_loss: 182962.1719
-
-Epoch 92/100
-
-28/28 - 0s - loss: 182969.1094 - val_loss: 182961.9219
-
-Epoch 93/100
-
-28/28 - 0s - loss: 182968.8125 - val_loss: 182961.6406
-
-Epoch 94/100
-
-28/28 - 0s - loss: 182968.5469 - val_loss: 182961.3594
-
-Epoch 95/100
-
-28/28 - 0s - loss: 182968.2812 - val_loss: 182961.1250
-
-Epoch 96/100
-
-28/28 - 0s - loss: 182968.0312 - val_loss: 182960.8438
-
-Epoch 97/100
-
-28/28 - 0s - loss: 182967.7344 - val_loss: 182960.5625
-
-Epoch 98/100
-
-28/28 - 0s - loss: 182967.4688 - val_loss: 182960.3281
-
-Epoch 99/100
-
-28/28 - 0s - loss: 182967.2031 - val_loss: 182960.0312
-
-Epoch 100/100
-
-28/28 - 0s - loss: 182966.9375 - val_loss: 182959.7812
- #+end_example
-
  #+NAME: DA9C7EB4-EE8F-42AC-AE5E-F6B6A0EA6D22
  #+begin_src ein-python :results output
 model.compile(loss='mse', optimizer='adam')
 history2 = model.fit(X_train, y_train, epochs=100, batch_size=142, validation_data=(X_test, y_test), verbose=2, shuffle=False)
  #+end_src
-
- #+RESULTS: DA9C7EB4-EE8F-42AC-AE5E-F6B6A0EA6D22
- #+begin_example
-Epoch 1/100
-
-28/28 - 0s - loss: 41784913920.0000 - val_loss: 41774653440.0000
-
-Epoch 2/100
-28/28 - 0s - loss: 41784811520.0000 - val_loss: 41774567424.0000
-
-Epoch 3/100
-28/28 - 0s - loss: 41784717312.0000 - val_loss: 41774469120.0000
-
-Epoch 4/100
-
-28/28 - 0s - loss: 41784623104.0000 - val_loss: 41774374912.0000
-
-Epoch 5/100
-
-28/28 - 0s - loss: 41784528896.0000 - val_loss: 41774284800.0000
-
-Epoch 6/100
-
-28/28 - 0s - loss: 41784434688.0000 - val_loss: 41774186496.0000
-
-Epoch 7/100
-
-28/28 - 0s - loss: 41784340480.0000 - val_loss: 41774092288.0000
-
-Epoch 8/100
-
-28/28 - 0s - loss: 41784242176.0000 - val_loss: 41773993984.0000
-
-Epoch 9/100
-
-28/28 - 0s - loss: 41784147968.0000 - val_loss: 41773907968.0000
-
-Epoch 10/100
-
-28/28 - 0s - loss: 41784057856.0000 - val_loss: 41773813760.0000
-
-Epoch 11/100
-
-28/28 - 0s - loss: 41783955456.0000 - val_loss: 41773715456.0000
-
-Epoch 12/100
-
-28/28 - 0s - loss: 41783873536.0000 - val_loss: 41773621248.0000
-
-Epoch 13/100
-
-28/28 - 0s - loss: 41783771136.0000 - val_loss: 41773531136.0000
-
-Epoch 14/100
-
-28/28 - 0s - loss: 41783668736.0000 - val_loss: 41773424640.0000
-
-Epoch 15/100
-
-28/28 - 0s - loss: 41783566336.0000 - val_loss: 41773326336.0000
-
-Epoch 16/100
-
-28/28 - 0s - loss: 41783463936.0000 - val_loss: 41773232128.0000
-
-Epoch 17/100
-
-28/28 - 0s - loss: 41783369728.0000 - val_loss: 41773142016.0000
-
-Epoch 18/100
-
-28/28 - 0s - loss: 41783279616.0000 - val_loss: 41773043712.0000
-
-Epoch 19/100
-
-28/28 - 0s - loss: 41783181312.0000 - val_loss: 41772949504.0000
-
-Epoch 20/100
-
-28/28 - 0s - loss: 41783087104.0000 - val_loss: 41772855296.0000
-
-Epoch 21/100
-
-28/28 - 0s - loss: 41782996992.0000 - val_loss: 41772761088.0000
-
-Epoch 22/100
-
-28/28 - 0s - loss: 41782898688.0000 - val_loss: 41772666880.0000
-
-Epoch 23/100
-
-28/28 - 0s - loss: 41782800384.0000 - val_loss: 41772576768.0000
-
-Epoch 24/100
-
-28/28 - 0s - loss: 41782710272.0000 - val_loss: 41772478464.0000
-
-Epoch 25/100
-
-28/28 - 0s - loss: 41782607872.0000 - val_loss: 41772380160.0000
-
-Epoch 26/100
-
-28/28 - 0s - loss: 41782513664.0000 - val_loss: 41772290048.0000
-
-Epoch 27/100
-
-28/28 - 0s - loss: 41782415360.0000 - val_loss: 41772199936.0000
-
-Epoch 28/100
-
-28/28 - 0s - loss: 41782325248.0000 - val_loss: 41772101632.0000
-
-Epoch 29/100
-
-28/28 - 0s - loss: 41782235136.0000 - val_loss: 41772007424.0000
-
-Epoch 30/100
-
-28/28 - 0s - loss: 41782145024.0000 - val_loss: 41771909120.0000
-
-Epoch 31/100
-
-28/28 - 0s - loss: 41782042624.0000 - val_loss: 41771823104.0000
-
-Epoch 32/100
-
-28/28 - 0s - loss: 41781952512.0000 - val_loss: 41771728896.0000
-
-Epoch 33/100
-
-28/28 - 0s - loss: 41781846016.0000 - val_loss: 41771630592.0000
-
-Epoch 34/100
-
-28/28 - 0s - loss: 41781747712.0000 - val_loss: 41771536384.0000
-
-Epoch 35/100
-
-28/28 - 0s - loss: 41781657600.0000 - val_loss: 41771438080.0000
-
-Epoch 36/100
-
-28/28 - 0s - loss: 41781567488.0000 - val_loss: 41771347968.0000
-
-Epoch 37/100
-
-28/28 - 0s - loss: 41781473280.0000 - val_loss: 41771257856.0000
-
-Epoch 38/100
-
-28/28 - 0s - loss: 41781379072.0000 - val_loss: 41771163648.0000
-
-Epoch 39/100
-
-28/28 - 0s - loss: 41781280768.0000 - val_loss: 41771069440.0000
-
-Epoch 40/100
-
-28/28 - 0s - loss: 41781190656.0000 - val_loss: 41770967040.0000
-
-Epoch 41/100
-
-28/28 - 0s - loss: 41781100544.0000 - val_loss: 41770881024.0000
-
-Epoch 42/100
-
-28/28 - 0s - loss: 41780998144.0000 - val_loss: 41770782720.0000
-
-Epoch 43/100
-
-28/28 - 0s - loss: 41780908032.0000 - val_loss: 41770684416.0000
-
-Epoch 44/100
-
-28/28 - 0s - loss: 41780805632.0000 - val_loss: 41770594304.0000
-
-Epoch 45/100
-
-28/28 - 0s - loss: 41780711424.0000 - val_loss: 41770500096.0000
-
-Epoch 46/100
-
-28/28 - 0s - loss: 41780613120.0000 - val_loss: 41770405888.0000
-
-Epoch 47/100
-
-28/28 - 0s - loss: 41780523008.0000 - val_loss: 41770311680.0000
-
-Epoch 48/100
-
-28/28 - 0s - loss: 41780428800.0000 - val_loss: 41770225664.0000
-
-Epoch 49/100
-
-28/28 - 0s - loss: 41780334592.0000 - val_loss: 41770119168.0000
-
-Epoch 50/100
-
-28/28 - 0s - loss: 41780240384.0000 - val_loss: 41770029056.0000
-
-Epoch 51/100
-
-28/28 - 0s - loss: 41780142080.0000 - val_loss: 41769930752.0000
-
-Epoch 52/100
-
-28/28 - 0s - loss: 41780051968.0000 - val_loss: 41769840640.0000
-
-Epoch 53/100
-
-28/28 - 0s - loss: 41779949568.0000 - val_loss: 41769746432.0000
-
-Epoch 54/100
-
-28/28 - 0s - loss: 41779855360.0000 - val_loss: 41769648128.0000
-
-Epoch 55/100
-
-28/28 - 0s - loss: 41779765248.0000 - val_loss: 41769558016.0000
-
-Epoch 56/100
-
-28/28 - 0s - loss: 41779666944.0000 - val_loss: 41769463808.0000
-
-Epoch 57/100
-
-28/28 - 0s - loss: 41779572736.0000 - val_loss: 41769373696.0000
-
-Epoch 58/100
-
-28/28 - 0s - loss: 41779474432.0000 - val_loss: 41769275392.0000
-
-Epoch 59/100
-
-28/28 - 0s - loss: 41779380224.0000 - val_loss: 41769181184.0000
-
-Epoch 60/100
-
-28/28 - 0s - loss: 41779294208.0000 - val_loss: 41769086976.0000
-
-Epoch 61/100
-
-28/28 - 0s - loss: 41779195904.0000 - val_loss: 41768992768.0000
-
-Epoch 62/100
-
-28/28 - 0s - loss: 41779093504.0000 - val_loss: 41768894464.0000
-
-Epoch 63/100
-
-28/28 - 0s - loss: 41779007488.0000 - val_loss: 41768800256.0000
-
-Epoch 64/100
-
-28/28 - 0s - loss: 41778905088.0000 - val_loss: 41768710144.0000
-
-Epoch 65/100
-
-28/28 - 0s - loss: 41778806784.0000 - val_loss: 41768615936.0000
-
-Epoch 66/100
-
-28/28 - 0s - loss: 41778716672.0000 - val_loss: 41768525824.0000
-
-Epoch 67/100
-
-28/28 - 0s - loss: 41778622464.0000 - val_loss: 41768427520.0000
-
-Epoch 68/100
-
-28/28 - 0s - loss: 41778524160.0000 - val_loss: 41768333312.0000
-
-Epoch 69/100
-
-28/28 - 0s - loss: 41778434048.0000 - val_loss: 41768239104.0000
-
-Epoch 70/100
-
-28/28 - 0s - loss: 41778339840.0000 - val_loss: 41768140800.0000
-
-Epoch 71/100
-
-28/28 - 0s - loss: 41778241536.0000 - val_loss: 41768046592.0000
-
-Epoch 72/100
-
-28/28 - 0s - loss: 41778155520.0000 - val_loss: 41767956480.0000
-
-Epoch 73/100
-
-28/28 - 0s - loss: 41778057216.0000 - val_loss: 41767862272.0000
-
-Epoch 74/100
-
-28/28 - 0s - loss: 41777954816.0000 - val_loss: 41767768064.0000
-
-Epoch 75/100
-
-28/28 - 0s - loss: 41777856512.0000 - val_loss: 41767673856.0000
-
-Epoch 76/100
-
-28/28 - 0s - loss: 41777766400.0000 - val_loss: 41767579648.0000
-
-Epoch 77/100
-
-28/28 - 0s - loss: 41777668096.0000 - val_loss: 41767489536.0000
-
-Epoch 78/100
-
-28/28 - 0s - loss: 41777573888.0000 - val_loss: 41767387136.0000
-
-Epoch 79/100
-
-28/28 - 0s - loss: 41777475584.0000 - val_loss: 41767297024.0000
-
-Epoch 80/100
-
-28/28 - 0s - loss: 41777389568.0000 - val_loss: 41767202816.0000
-
-Epoch 81/100
-
-28/28 - 0s - loss: 41777291264.0000 - val_loss: 41767108608.0000
-
-Epoch 82/100
-
-28/28 - 0s - loss: 41777188864.0000 - val_loss: 41767010304.0000
-
-Epoch 83/100
-
-28/28 - 0s - loss: 41777106944.0000 - val_loss: 41766920192.0000
-
-Epoch 84/100
-
-28/28 - 0s - loss: 41777004544.0000 - val_loss: 41766825984.0000
-
-Epoch 85/100
-
-28/28 - 0s - loss: 41776906240.0000 - val_loss: 41766735872.0000
-
-Epoch 86/100
-
-28/28 - 0s - loss: 41776816128.0000 - val_loss: 41766633472.0000
-
-Epoch 87/100
-
-28/28 - 0s - loss: 41776717824.0000 - val_loss: 41766543360.0000
-
-Epoch 88/100
-
-28/28 - 0s - loss: 41776623616.0000 - val_loss: 41766449152.0000
-
-Epoch 89/100
-
-28/28 - 0s - loss: 41776529408.0000 - val_loss: 41766354944.0000
-
-Epoch 90/100
-
-28/28 - 0s - loss: 41776427008.0000 - val_loss: 41766260736.0000
-
-Epoch 91/100
-
-28/28 - 0s - loss: 41776336896.0000 - val_loss: 41766162432.0000
-
-Epoch 92/100
-
-28/28 - 0s - loss: 41776242688.0000 - val_loss: 41766072320.0000
-
-Epoch 93/100
-
-28/28 - 0s - loss: 41776152576.0000 - val_loss: 41765978112.0000
-
-Epoch 94/100
-
-28/28 - 0s - loss: 41776050176.0000 - val_loss: 41765883904.0000
-
-Epoch 95/100
-
-28/28 - 0s - loss: 41775960064.0000 - val_loss: 41765789696.0000
-
-Epoch 96/100
-
-28/28 - 0s - loss: 41775861760.0000 - val_loss: 41765695488.0000
-
-Epoch 97/100
-
-28/28 - 0s - loss: 41775775744.0000 - val_loss: 41765601280.0000
-
-Epoch 98/100
-
-28/28 - 0s - loss: 41775677440.0000 - val_loss: 41765511168.0000
-
-Epoch 99/100
-
-28/28 - 0s - loss: 41775575040.0000 - val_loss: 41765408768.0000
-
-Epoch 100/100
-
-28/28 - 0s - loss: 41775489024.0000 - val_loss: 41765318656.0000
- #+end_example
-
 
  #+NAME: C8A10AC4-B512-4466-948E-C7FCD723B43F
  #+begin_src ein-python :results output
@@ -1581,13 +817,6 @@ print("LSTM \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
              history.history['val_loss'][-1])
              )
  #+end_src
-
- #+RESULTS: C8A10AC4-B512-4466-948E-C7FCD723B43F
- : LSTM 
- : ===================================
- : 
- :  Mean Squared Error: 41765318656.0 
- :  Mean Absolute Error : 182959.78125
 
   : Random Forest 
   : ===================================
@@ -1613,6 +842,12 @@ print("LSTM \n{}\n\n Mean Squared Error: {} \n Mean Absolute Error : {}". \
  estimation in the epochs I assume that there is still some work to be
  done with the model before bringing this into production.
 
+
+#+NAME: A8F20CC2-5048-44BC-AAA3-87B44E1260EF
+#+BEGIN_SRC ein-python  :results output
+grid.best_params_
+#+END_SRC
+
  #+NAME: 3CF4092D-042F-49A0-88A9-ECFAA11B3607
  #+begin_src ein-python :results output
 # plot history
@@ -1621,9 +856,6 @@ plt.plot(history2.history['val_loss'], label='test')
 plt.legend()
 plt.show()
  #+end_src
-
- #+RESULTS: 3CF4092D-042F-49A0-88A9-ECFAA11B3607
- [[file:ein-images/ob-ein-7ef43fddec77f062c6593d1a17846fc6.png]]
 
    
 ** TODO 
@@ -1634,3 +866,4 @@ plt.show()
 
     check how the movement of the mass is defined there. 
 
+    

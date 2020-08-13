@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-"""
-use the iris data to demonstrate how logging is tied to 
-a machine learning model to enable performance monitoring
+"""log model performance
+
+implements a logger for logging and keeping track of the model
+performance.
 """
 
 import time,os,re,csv,sys,uuid,joblib
@@ -23,7 +24,8 @@ def train_model(X,y,saved_model):
 
     ## Specify parameters and model
     params = {'C':1.0,'kernel':'linear','gamma':0.5}
-    
+
+    ## notice that with **params you are passing a dictionary as the parameters.
     clf = svm.SVC(**params,probability=True)
 
     ## fit model on training data

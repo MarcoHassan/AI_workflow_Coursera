@@ -52,7 +52,10 @@ class ApiTest(unittest.TestCase):
         test the predict functionality
         """
       
-        query_data = np.array([[6.1,2.8]])
+        query_data = np.array([[3.89, 5.78,
+                                7.42086181, 9.42086181,
+                                2.1904, 6.1966,
+                                1.7743]])
         query_data = query_data.tolist()
         query_type = 'numpy'
         request_json = {'query':query_data,'type':query_type}

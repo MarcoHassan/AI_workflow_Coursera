@@ -18,7 +18,7 @@ import re
 from ast import literal_eval
 import numpy as np
 
-port = 8080
+port = 4000
 
 try:
     requests.post('http://0.0.0.0:{}/predict'.format(port))
@@ -59,7 +59,10 @@ class ApiTest(unittest.TestCase):
 
         r = requests.post('http://0.0.0.0:{}/predict'.format(port),json=request_json)
         response = literal_eval(r.text)
-        self.assertEqual(response['y_pred'],[1])
+        print(r.text)
+        print(response)
+        print("hello_world")
+        self.assertEqual(response['y_pred'],[])
 
     @unittest.skipUnless(server_available,"local server is not running")
     def test_train(self):

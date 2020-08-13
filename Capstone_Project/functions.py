@@ -20,11 +20,6 @@ import pandas as pd
 ## dict.
 from collections import defaultdict
 
-## For date manipulation
-import time
-from datetime import datetime
-
-
 def fetch_data(data_dir):
     """
     laod all json formatted files into a dataframe

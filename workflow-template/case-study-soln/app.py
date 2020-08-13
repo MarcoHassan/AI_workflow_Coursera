@@ -57,7 +57,9 @@ def predict():
         test = True
 
     ## extract the query
+
     query = request.json['query']
+    print(query)
         
     if request.json['type'] == 'dict':
         pass

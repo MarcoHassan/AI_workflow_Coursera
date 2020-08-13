@@ -40,9 +40,13 @@ class ApiTest(unittest.TestCase):
         test the train functionality
         """
       
-        request_json = {'mode':'test'}
+        request_json = {'mode':'test'} ## serialize the model and logs
+                                       ## the trained model as test in
+                                       ## the logger.
+
         r = requests.post('http://0.0.0.0:{}/train'.format(port),json=request_json)
         train_complete = re.sub("\W+","",r.text)
+
         self.assertEqual(train_complete,'true')
     
     @unittest.skipUnless(server_available,"local server is not running")
@@ -65,17 +69,18 @@ class ApiTest(unittest.TestCase):
         test the predict functionality
         """
 
-        query_data = {'country': ['united_states','singapore','united_states'],
-                      'age': [24,42,20],
-                      'subscriber_type': ['aavail_basic','aavail_premium','aavail_basic'],
-                      'num_streams': [8,17,14]
-        }
+        query_data = np.array([[6.1,2.8]])
+        query_data = query_data.tolist()
+        query_type = 'numpy'
+        request_json = {'query':query_data,'type':query_type}
 
-        query_type = 'dict'
-        request_json = {'query':query_data,'type':query_type,'mode':'test'}
+        request_json = {'query':query_data,'type':query_type,
+                        'mode':'test'}
 
         r = requests.post('http://0.0.0.0:{}/predict'.format(port),json=request_json)
+
         response = literal_eval(r.text)
+        print(response)
 
         for p in response['y_pred']:
             self.assertTrue(p in [0.0, 1.0])
