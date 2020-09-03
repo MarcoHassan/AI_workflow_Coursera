@@ -41,10 +41,22 @@ class ModelTest(unittest.TestCase):
         model = model_load()
         
         ## example predict
-        for query in [np.array([[6.1,2.8]]), np.array([[7.7,2.5]]), np.array([[5.8,3.8]])]:
+        for query in [np.array([[3.89, 5.78,
+                                7.42086181, 9.42086181,
+                                2.1904, 6.1966,
+                                1.7743]]),
+                      np.array([[3.89, 5.78,
+                                7.42086181, 9.42086181,
+                                2.1904, 6.1966,
+                                1.7743]]),
+                      np.array([[3.89, 4.78,
+                                3.42086181, 12.42086181,
+                                2.1904, 3.1966,
+                                2.123123]])]:
             result = model_predict(query,model)
-            y_pred = result['y_pred']
-            self.assertTrue(y_pred in [0,1,2])
+
+            y_pred = result[0]
+            self.assertTrue(y_pred > 0)
 
         
 ### Run the tests
