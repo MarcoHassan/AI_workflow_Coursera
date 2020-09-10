@@ -10,3 +10,14 @@ engineering and model deployment that you should keep throughout AI
 projects.
 
 ** TODO write the logic of the project so that you do not have to start each time from scratch
+
+For running the docker image 
+
+
+#+BEGIN_SRC sh
+  docker build -t iris-ml .
+  docker list
+  docker image ls
+  docker run -p 4000:8080 iris-ml
+#+END_SRC
+

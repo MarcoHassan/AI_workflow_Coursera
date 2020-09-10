@@ -1,3 +1,0 @@
-unique_id,timestamp,y_pred,y_proba,query,model_version,runtime
-675768b0-890b-409e-beb1-1a1e450df4a1,1599135602.2788322,[0],"[0.6, 0.4]","['united_states', 24, 'aavail_basic', 8]",0.1,00:00:02
-10c8dcc6-4dfb-433d-8791-48059f09c2fb,1599135602.2791119,[0],"[0.6, 0.4]","['united_states', 24, 'aavail_basic', 8]",0.1,00:00:02

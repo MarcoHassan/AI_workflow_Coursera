@@ -36,12 +36,13 @@ def update_train_log(data_shape,eval_test,runtime,MODEL_VERSION,MODEL_VERSION_NO
                             MODEL_VERSION,MODEL_VERSION_NOTE,runtime])
         writer.writerow(to_write)
 
-def update_predict_log(y_pred,y_proba,query,runtime,MODEL_VERSION,test=False):
+def update_predict_log(y_pred,query,runtime,MODEL_VERSION,test=False):
     """
     update predict log file
     """
 
-    ## name the logfile using something that cycles with date (day, month, year)    
+    ## name the logfile using something that cycles with date (day,
+    ## month, year)    
     today = date.today()
     if test:
         logfile = os.path.join("logs","predict-test.log")
@@ -49,7 +50,7 @@ def update_predict_log(y_pred,y_proba,query,runtime,MODEL_VERSION,test=False):
         logfile = os.path.join("logs","predict-{}-{}.log".format(today.year, today.month))
         
     ## write the data to a csv file    
-    header = ['unique_id','timestamp','y_pred','y_proba','query','model_version','runtime']
+    header = ['unique_id','timestamp','y_pred','query','model_version','runtime']
     write_header = False
     if not os.path.exists(logfile):
         write_header = True
@@ -58,7 +59,7 @@ def update_predict_log(y_pred,y_proba,query,runtime,MODEL_VERSION,test=False):
         if write_header:
             writer.writerow(header)
 
-        to_write = map(str,[uuid.uuid4(),time.time(),y_pred,y_proba,query,
+        to_write = map(str,[uuid.uuid4(),time.time(),y_pred,query,
                             MODEL_VERSION,runtime])
         writer.writerow(to_write)
 

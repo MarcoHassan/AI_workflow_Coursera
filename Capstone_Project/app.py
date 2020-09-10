@@ -50,29 +50,32 @@ def predict():
         query_type = 'numpy'
 
     query = request.json['query']
-        
-    if request.json['type'] == 'numpy':
-        query = np.array(query)
-    else:
-        print("ERROR API (predict): only numpy data types have been implemented")
-        return jsonify([])
-        
+
+    idx = query['idx']
+    query = np.array(query['data'])
+
     ## load model
     model = model_load()
-    
+
     if not model:
-        print("ERROR: model is not available")
+        print("ERROR: model is not navailable")
         return jsonify([])
+
+    _result = {}
     
-    _result = model_predict(query,model)
+    for i, j in list(zip(query, idx)):        
+        _result[j] = (model_predict(i,model))
+
     result = {}
+
+    result['y_pred'] = {}
 
     ## convert numpy objects so ensure they are serializable
     for key,item in _result.items():
         if isinstance(item,np.ndarray):
-            result[key] = item.tolist()
+            result['y_pred'][key] = item.tolist()
         else:
-            result[key] = item
+            result['y_pred'][key] = item
 
     return(jsonify(result))
 
