@@ -192,16 +192,56 @@ logger file. You can then run analysis on such log files to check if
 new outliers are present or whether there was a distributional
 change. 
 
-This was done in the ipython module available at:
+This was done in the ipython module available [[https://github.com/MarcoHassan/AI_workflow_Coursera/blob/master/Capstone_Project/m6_dist_outlier.ipynb][here]].
+
+This is in general a good and sophisticated way to work. You would
+then have to see how to incorporate this into a dashboard for a
+project. If you are working with javascript/front end ppl you could
+actually pass the result as a json through an endpoint and let them
+handle it. Otherwise you would probably have to work with [[https://plotly.com/dash/][dash]] or smth
+like that.
+
+Notice finally that in the ipython notebook above I worked to exercise
+with first simulated data and then with the production data. Notice
+that would this be a real world case you would work just with the
+production dataset.
 
 ** Running into docker
 
-For running the docker image 
+For running the docker image Work as follows.
 
-#+BEGIN_SRC sh
-  docker build -t iris-ml .
+In your virtual environment for your project on your current machine
+get all of the packages that you used for the project and save them in
+a =requirements.txt= file that you will pass to the Dockerengine
+through the specifications of the Dockerfile.
+
+In order to do so run in the root directory where your Dockerfile is 
+
+#+begin_src sh
+ pip3 freeze >> requirements.txt
+#+end_src
+
+
+Specify then your docker image as done in this current directory. 
+
+Then save the image and associate to it a tag. Optionally upload to
+image to a public/private registry if necessary.
+
+Run the image and specify the port.
+
+#+BEGIN_SRC sh 
+  docker build -t my-project .
   docker list
   docker image ls
-  docker run -p 4000:8080 iris-ml
+  docker run -p 8080:8080 my-project
 #+END_SRC
+
+Where in the last command you map port 8080 of the container *the
+second entry after the semi column* - i.e. the port that you specify
+in your app where your webapp will run, to port 8080 of the local
+host, the *first entry before the semi column*.
+
+You can finally run your =run-test.py= script to check that all the
+unittests run and continue developing
+
 
