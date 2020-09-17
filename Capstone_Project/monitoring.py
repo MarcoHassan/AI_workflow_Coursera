@@ -77,10 +77,15 @@ def get_monitoring_tools(X,y):
 
     ## determine thresholds as a function of the confidence intervals
     outliers_X.sort()
+
+    print(outliers_X.sort())
+    print(outliers_X)
+    
     # get the threshold as some sort of interquantile range
     outlier_X_threshold = outliers_X[int(0.975*bs_samples)] + outliers_X[int(0.025*bs_samples)]
 
     wasserstein_X.sort()
+    print(wasserstein_X.sort())
     # get the quantile of the wasserstein threshold according to the
     # distribution of the wasserstein distance among the subsamples.
     wasserstein_X_threshold = wasserstein_X[int(0.975*bs_samples)] + wasserstein_X[int(0.025*bs_samples)]
@@ -100,18 +105,18 @@ def get_monitoring_tools(X,y):
     return(to_return)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    ## get latest training data
-    data = get_latest_train_data()
-    y = data['y']
-    X = data['X']
+#     ## get latest training data
+#     data = get_latest_train_data()
+#     y = data['y']
+#     X = data['X']
 
-    ## get performance monitoring tools
-    pm_tools = get_monitoring_tools(X,y)
-    print("outlier_X",pm_tools['outlier_X'])
-    print("wasserstein_X",pm_tools['wasserstein_X'])
-    print("wasserstein_y",pm_tools['wasserstein_y'])
+#     ## get performance monitoring tools
+#     pm_tools = get_monitoring_tools(X,y)
+#     print("outlier_X",pm_tools['outlier_X'])
+#     print("wasserstein_X",pm_tools['wasserstein_X'])
+#     print("wasserstein_y",pm_tools['wasserstein_y'])
     
-    print("done")
+#     print("done")
 

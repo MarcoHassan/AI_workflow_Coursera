@@ -58,7 +58,7 @@ MODEL_VERSION = 0.1
 MODEL_VERSION_NOTE = "example random forest on toy data"
 SAVED_MODEL = "model-{}.joblib".format(re.sub("\.","_",str(MODEL_VERSION)))
 
-def fetch_data():
+def fetch_data(DATADIR = DATADIR):
     """
     fetch the data for training your model
 

@@ -51,18 +51,29 @@ class ApiTest(unittest.TestCase):
         """
         test the predict functionality
         """
-      
+
         query_data = np.array([[3.89, 5.78,
                                 7.42086181, 9.42086181,
                                 2.1904, 6.1966,
                                 1.7743]])
-        query_data = query_data.tolist()
-        query_type = 'numpy'
-        request_json = {'query':query_data,'type':query_type}
 
-        r = requests.post('http://0.0.0.0:{}/predict'.format(port),json=request_json)
+        ## ping the API
+        test = dict()
+
+        test['query'] = {}
+
+        test['query']['data'] = query_data.tolist()
+        test['query']['columns'] = []
+        test['query']['idx'] = len(query_data)
+
+        request_json = test
+
+        r = requests.post('http://0.0.0.0:{}/predict'.format(port),
+                          json=request_json)
+        
         response = literal_eval(r.text)
-        self.assertEqual(response['y_pred'],[1])
+
+        self.assertGreater(response['y_pred'][str(1)],[0])
 
     @unittest.skipUnless(server_available,"local server is not running")
     def test_train(self):

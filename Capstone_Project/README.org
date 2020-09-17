@@ -1,18 +1,202 @@
 * AI workflow template
 
-This is a template for a coursera training I got. It is not much about
-the ML algorithm. It is much more about the logic and the structure in
-the project.
+This is a template for a coursera training I got. 
 
-It covers unit tests, model containerization, model monitoring /drift
-detection as well as the logic of EDA, hypothesis testing, features
-engineering and model deployment that you should keep throughout AI
-projects.
+It is not much about the ML algorithm. It is much more about the logic
+and the structure in the project.
 
-** TODO write the logic of the project so that you do not have to start each time from scratch
+You should follow the general structure of this template when working
+on real world scenario. 
+
+This moreover represents a possible quick solution for the capstone
+case study of the coursera ai workflow module. Notice that here the
+effort was not in developing the most accurate possible model but
+rather in general to understand the workflow and save energies and
+time for real world projects.
+
+The general workflow you should use in your project - works as follows
+-:
+
+PHASE 1:
+
+- Understand the business case. What are exactly the customer needs?
+
+- Understand KPI the customer is interested in. 
+
+- Communicate with the customer at the beginning to make these
+  explicit and to clearly define the scope of the project.
+
+PHASE 2:
+
+- Start with an exploratory analysis of the data. What type of data do
+  you have to work with? Times series? Cross sectional? Panel data?
+
+- Understand the ordinal and nominal data. What do they represent?
+
+- How are the data distributed? Are important skewed distributions at
+  place that deserve special attention when modeling the data? What is
+  the effect of the skewness? What about the kurtosis?
+
+- Are there missing data? How do you handle such? 
+
+- Start to make basics hypothesis and test them according to standard
+  multivariate/univariate ANOVA test. 
+
+- What about correlations in the data? Do important pattern emerge?
+
+Notice that for this specific project the EDA is performed at [[https://github.com/MarcoHassan/AI_workflow_Coursera/blob/master/Capstone_Project/Eda_json.org][this
+link]]. I work in emacs with python and there is a powerful mode (=org
+mode=) to organize your workflow and do literal programming. This is
+essentially why you will see =org= files in my repo.
+
+
+PHASE 3:
+
+- treat outliers. 
+
+- group data together if the case requires that. convert continuous
+  variable into discrete/grouped variables upon need.
+
+- perform feature engineering; for instance:
+
+  + autoregressive terms, autocorrelations, partial autocorrelations,
+    higher moments autoregressive terms, cross correlations in times
+    series.
+
+  + pca variables when dealing with very high dimensional feature
+    spaces
+
+  + factor analysis data when just observing some manifestation of the
+    true underlying variables of interest
+
+  + possible clusters to which an observation vector belongs to
+    according to some clustering algorithm. this might carry some
+    interesting property that relates to the correlation structure and
+    distance metrics of the features matrix in the hyperspace.
+
+  + etc. etc. (add in the future)
+
+Notice that for this project again I did not go the fancy way. I just
+took the features matrix proposed in the project with a couple of
+autoregressive terms for the revenue streams and preprocessed them in
+the most basic way (check the model.py script - especially the
+fetch_dat and get_preprocessor functions).
+
+
+PHASE 4:
+
+Fit your ML/AI/stochastic model 
+
+here again I worked in a very extreme quick and dirty way. I took as
+the benchmark model/baseline estimator the simple average of the
+observed revenues at 30 days distance lags in the training sample.
+
+I then compared such baseline estimate to some naive Machine Learning
+models not taking into consideration the times series structure  of
+the data - i.e. their dependencies -.  I.e. I just took the feature
+matrix as a way to predict the revenues ahead and I did not give
+different weights to most recent observations or try to leverage some
+temporal patterns. For that check at your master thesis or at some
+projects you did when modeling financial volatility or features
+correlations. Two of such models tested were a random forest algorithm
+and a support vector regression model. 
+
+I even tried a simple LSTM model. I trained for little time and put
+one simple layer in the data, the result was that the result of the
+simple ML algorithms above not leveraging the times series structure
+outperformed. Obviously there is potential in there and you could even
+try to go into multivariate LSTM models which looks interesting.
+
+
+PHASE 5:
+
+Write your flask framework for deploying your model and some unittests
+related to them, ideally in a TDD way.
+
+Here it is important to understand the structure as this is the one
+you will use for further projects; while the above was one shot for
+this fake project so I did it quickly.
+
+So the unittests structure is as follows.
+
+#+begin_example
+
+├── ApiTests.py
+├── LoggerTests.py
+├── ModelTests.py
+├── __init__.py
+└── __pycache__
+    ├── ApiTests.cpython-37.pyc
+    ├── ModelTests.cpython-37.pyc
+    └── __init__.cpython-37.pyc
+
+#+end_example
+
+I.e. you  would have 3 scripts =ApiTests=, =LoggerTests= and
+=ModelTests=.
+
+Each of the modules would carry different tests:
+
+- =ModelTests=:
+  
+  + Train: tests whether the training of the model works. This
+    training function is specified in the =model.py= script. There
+    training data are automatically fetched according to the features
+    engineering performed in the =fetch_data= function in the module
+    previously addressed.
+
+  + Load: after the model is trained it gets dumped and saved in
+    pickle format. Here you test that you can smoothly get and load
+    such model into memory.
+
+  + Predict: here you pass some numpy array of the shape of your
+    feature matrix and check whether you manage to predict the
+    dependent variable by passing such arrays to the loaded model.
+
+- =LoggerTests=
+
+  + Train_write: ensure that you are able to write down to your log
+    file some fake metric result using the =update_train_log= function
+    specified in the =loggs.py= script. Look if a file is created if
+    it does not exists yet.
+
+  + Train_read: check if you are able to withdraw the written input in
+    the log file and if that equals the metrics that you specified to
+    be written.
+
+  + Test_write: same as above with the testing/prediction metrics.
+
+  + Test_read: same as above with the testing/prediction metrics.
+
+
+- =ApiTests=
+
+  Here you check if the flask server and your endpoint is working
+  smoothly.
+
+  + test_predict_empty: here you test that if you do not pass anything
+    to the prediction endpoint you get back an empty list.n
+
+  + test_predict: test the prediction endpoint. Check if when passing
+    a feature matrix in the desired shape as a numpy array you get
+    back a meaningful result that makes mathematically sense.
+
+  + test_train: check that you manage to communicate smoothly with the
+    training endpoint and that you get back a =true= message;
+    i.e. that you manage to the end/return of the function without
+    running into any issues.
+
+Important also for the design of the template is that each time a
+prediction/train on the endpoint is made you would log it into the
+logger file. You can then run analysis on such log files to check if
+new outliers are present or whether there was a distributional
+change. 
+
+This was done in the ipython module available at:
+
+** Running into docker
 
 For running the docker image 
-
 
 #+BEGIN_SRC sh
   docker build -t iris-ml .

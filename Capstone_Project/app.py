@@ -62,9 +62,13 @@ def predict():
         return jsonify([])
 
     _result = {}
-    
-    for i, j in list(zip(query, idx)):        
-        _result[j] = (model_predict(i,model))
+
+    if idx == 1:
+        _result[idx] = (model_predict(query,model))
+
+    else:
+        for i, j in list(zip(query, idx)):        
+            _result[j] = (model_predict(i,model))
 
     result = {}
 

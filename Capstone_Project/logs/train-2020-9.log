@@ -1,0 +1,10 @@
+unique_id,timestamp,x_shape,eval_test,model_version,model_version_note,runtime
+15aa670f-64e2-4ea1-9bc2-b5513c10fa28,1600347045.669247,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.21187549897495,0.1,example random forest on toy data,000:02:07
+6b8a33c7-7571-4818-8fd8-3c190964c209,1600347157.6716301,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.21187549897479,0.1,example random forest on toy data,000:01:51
+51fb7f17-7dc1-482f-9955-1c61ab5b79c2,1600347490.732352,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.2118754989747,0.1,example random forest on toy data,000:02:05
+0b8d5b71-2904-4d12-a67e-779385c624fe,1600347604.7359092,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.21187549897485,0.1,example random forest on toy data,000:01:53
+2002d7b8-90a7-44f1-9f42-86b0807cc521,1600348587.253907,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.24635485664 --  Mean Absolute Error : 95.21187549897517,0.1,example random forest on toy data,000:01:58
+8b178e50-6d5b-4d6a-a8d1-e79e74c9f7b4,1600348711.5030231,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.21187549897492,0.1,example random forest on toy data,000:02:04
+379c31b9-5bcf-412d-b5cb-dfaf8ba294e9,1600349164.134617,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.24635485664 --  Mean Absolute Error : 95.21187549897562,0.1,example random forest on toy data,000:02:01
+14345c1f-75c0-41c1-8676-d0a0ecb46f18,1600349280.26255,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.211875498975,0.1,example random forest on toy data,000:01:56
+8b0aa9be-1cbd-4f52-a880-5eb94dabebd7,1600350118.429007,"(5512, 7)",Random Forest --  Mean Squared Error: 319662.2463548565 --  Mean Absolute Error : 95.2118754989748,0.1,example random forest on toy data,000:01:57
