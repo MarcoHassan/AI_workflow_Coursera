@@ -43,7 +43,10 @@ def get_monitoring_tools(X,y):
     preprocessor = get_preprocessor()
     preprocessor = preprocessor.fit(X)
     X_pp = preprocessor.transform(X)
-    
+
+    ## fits an ellypsis (a multivariate gaussian distribution) to your
+    ## data and classifiy the number of outliers according to the
+    ## contamination parameter here 1% of the data.
     xpipe = Pipeline(steps=[('pca', PCA(2)),
                             ('clf', EllipticEnvelope(random_state=0,contamination=0.01))])
     xpipe.fit(X_pp)
@@ -54,21 +57,32 @@ def get_monitoring_tools(X,y):
     wasserstein_y = np.zeros(bs_samples)
     
     for b in range(bs_samples):
+        # get subsample of the data
         n_samples = int(np.round(0.80 * X.shape[0]))
         subset_indices = np.random.choice(np.arange(X.shape[0]),n_samples,replace=True).astype(int)
         y_bs=y[subset_indices]
         X_bs=X_pp[subset_indices,:]
-    
+        
+        ## get the outliers according to the ellipsis method fitted to
+        ## the entire dataset.
         test1 = xpipe.predict(X_bs)
+
+        ## get the wasserstein distance among the distribution of the
+        ## entire sample and the random subsample distribution.
         wasserstein_X[b] = wasserstein_distance(X_pp.flatten(),X_bs.flatten())
         wasserstein_y[b] = wasserstein_distance(y,y_bs.flatten())
+
+        ## get the percentage of outliers
         outliers_X[b] = 100 * (1.0 - (test1[test1==1].size / test1.size))
 
     ## determine thresholds as a function of the confidence intervals
     outliers_X.sort()
+    # get the threshold as some sort of interquantile range
     outlier_X_threshold = outliers_X[int(0.975*bs_samples)] + outliers_X[int(0.025*bs_samples)]
 
     wasserstein_X.sort()
+    # get the quantile of the wasserstein threshold according to the
+    # distribution of the wasserstein distance among the subsamples.
     wasserstein_X_threshold = wasserstein_X[int(0.975*bs_samples)] + wasserstein_X[int(0.025*bs_samples)]
 
     wasserstein_y.sort()
